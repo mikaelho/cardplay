@@ -1,5 +1,7 @@
 """Visibility rules for cardplay models."""
 
+from cards.context import current_game_id
+
 SUPERUSER_SENTINEL = "super"
 
 
@@ -67,8 +69,12 @@ def filter_characters(qs, player_id):
     Superusers see all characters.
     Keepers see all characters in their games.
     Players see only characters of other player-role members (not keeper characters).
+    When a game is selected, further scopes to that game only.
     """
     if _is_superuser(player_id):
+        game_id = current_game_id.get()
+        if game_id:
+            qs = qs.filter(game_id=game_id)
         return qs
     if player_id is None:
         return qs.none()
@@ -81,10 +87,16 @@ def filter_characters(qs, player_id):
         .values_list("game_id", "role")
     )
     game_ids = set(roles.keys())
+
+    # Scope by selected game if set
+    game_id = current_game_id.get()
+    if game_id:
+        game_ids = game_ids & {game_id}
+
     qs = qs.filter(game_id__in=game_ids)
 
     # In games where I'm a player: hide keeper characters
-    player_game_ids = [gid for gid, role in roles.items() if role == "player"]
+    player_game_ids = [gid for gid, role in roles.items() if role == "player" and gid in game_ids]
     if player_game_ids:
         keeper_ids = set(
             GameMembership.objects.filter(
@@ -98,9 +110,13 @@ def filter_characters(qs, player_id):
 
 
 def filter_cards(qs, player_id):
-    """Superusers see all cards; others see cards linked to characters in their games."""
+    """Superusers see all cards; others see cards linked to characters in their games.
+    When a game is selected, further scopes to that game only."""
     if _is_superuser(player_id):
-        return qs
+        game_id = current_game_id.get()
+        if game_id:
+            qs = qs.filter(characters__game_id=game_id)
+        return qs.distinct()
     if player_id is None:
         return qs.none()
     from cards.models import GameMembership
@@ -108,4 +124,7 @@ def filter_cards(qs, player_id):
         GameMembership.objects.filter(player_id=player_id)
         .values_list("game_id", flat=True)
     )
+    game_id = current_game_id.get()
+    if game_id:
+        game_ids = game_ids & {game_id}
     return qs.filter(characters__game_id__in=game_ids).distinct()

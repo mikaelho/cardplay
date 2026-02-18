@@ -8,6 +8,7 @@ from .character import Character
 from .card import Card
 from .character_card import CharacterCard
 from .game_membership import GameMembership
+from .hand import Hand
 
 __all__ = [
     "Tag",
@@ -20,4 +21,5 @@ __all__ = [
     "Card",
     "CharacterCard",
     "GameMembership",
+    "Hand",
 ]

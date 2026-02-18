@@ -26,7 +26,8 @@ import uvicorn
 
 import settings as django_settings
 from alive import setup_alive, set_event_loop, get_registered_models, render_theme_picker, render_theme_script, collect_static, static_url
-from cards.models import Player
+from cards.models import Player, Game, GameMembership, Character
+from cards.context import current_game_id, current_game_options, current_player_role, current_character_id
 
 # Context vars for passing session data to the sync root template
 _current_player_id = contextvars.ContextVar('current_player_id', default=None)
@@ -77,14 +78,49 @@ class PlayerContextMiddleware:
             t1 = _current_player_id.set(session.get("player_id"))
             t2 = _current_player_name.set(session.get("player_name"))
             t3 = _current_visible_urls.set(session.get("visible_urls"))
+            t4 = current_game_id.set(session.get("game_id"))
+            t5 = current_game_options.set(session.get("game_options"))
+            t6 = current_player_role.set(session.get("player_role"))
+            t7 = current_character_id.set(session.get("character_id"))
             try:
                 await self.app(scope, receive, send)
             finally:
                 _current_player_id.reset(t1)
                 _current_player_name.reset(t2)
                 _current_visible_urls.reset(t3)
+                current_game_id.reset(t4)
+                current_game_options.reset(t5)
+                current_player_role.reset(t6)
+                current_character_id.reset(t7)
         else:
             await self.app(scope, receive, send)
+
+
+async def _compute_role_and_character(session):
+    """Compute player_role and character_id for the current player/game selection."""
+    player_id = session.get("player_id")
+    game_id = session.get("game_id")
+
+    if not player_id or player_id == SUPERUSER_SENTINEL or not game_id:
+        session["player_role"] = None
+        session["character_id"] = None
+        return
+
+    @sync_to_async(thread_sensitive=False)
+    def _compute():
+        try:
+            membership = GameMembership.objects.get(player_id=player_id, game_id=game_id)
+            role = membership.role
+        except GameMembership.DoesNotExist:
+            return None, None
+        char_id = Character.objects.filter(
+            player_id=player_id, game_id=game_id
+        ).values_list('pk', flat=True).first()
+        return role, char_id
+
+    role, char_id = await _compute()
+    session["player_role"] = role
+    session["character_id"] = char_id
 
 
 async def set_player(request):
@@ -98,6 +134,17 @@ async def set_player(request):
         request.session["player_name"] = "Superuser"
         request.session["player_superuser"] = True
         request.session["visible_urls"] = [m["url"] for m in get_registered_models()]
+
+        # Superuser sees all games
+        @sync_to_async(thread_sensitive=False)
+        def _all_games():
+            return list(Game.objects.order_by("name").values("pk", "name"))
+
+        games = await _all_games()
+        request.session["game_options"] = games
+        request.session["game_id"] = games[0]["pk"] if games else None
+        request.session["player_role"] = None
+        request.session["character_id"] = None
     elif player_id:
         try:
             player = await sync_to_async(Player.objects.get, thread_sensitive=False)(pk=int(player_id))
@@ -119,16 +166,63 @@ async def set_player(request):
                 return urls
 
             request.session["visible_urls"] = await _compute_visible()
+
+            # Compute games for this player
+            @sync_to_async(thread_sensitive=False)
+            def _player_games():
+                return list(
+                    Game.objects.filter(memberships__player_id=player.pk)
+                    .order_by("name").values("pk", "name")
+                )
+
+            games = await _player_games()
+            request.session["game_options"] = games
+            request.session["game_id"] = games[0]["pk"] if games else None
+            await _compute_role_and_character(request.session)
         except Player.DoesNotExist:
             pass
     else:
-        for key in ("player_id", "player_name", "player_superuser", "visible_urls"):
+        for key in ("player_id", "player_name", "player_superuser", "visible_urls",
+                     "game_id", "game_options", "player_role", "character_id"):
             request.session.pop(key, None)
 
     # Refresh player cache in case players were added/removed
     await sync_to_async(_load_player_options_sync, thread_sensitive=False)()
 
     return RedirectResponse(url=referer, status_code=303)
+
+
+async def set_game(request):
+    """Endpoint to set the current game in session."""
+    game_id = request.query_params.get("id", "")
+    referer = request.headers.get("referer", "/alive/")
+
+    if game_id:
+        try:
+            request.session["game_id"] = int(game_id)
+        except (ValueError, TypeError):
+            pass
+    else:
+        request.session.pop("game_id", None)
+
+    await _compute_role_and_character(request.session)
+
+    return RedirectResponse(url=referer, status_code=303)
+
+
+def _render_game_selector(game_id_value):
+    """Render game selector dropdown HTML using game options from contextvar."""
+    game_options = current_game_options.get()
+    if not game_options or len(game_options) <= 1:
+        return ''
+    options = []
+    for g in game_options:
+        selected = 'selected' if g["pk"] == game_id_value else ''
+        options.append(f'<option value="{g["pk"]}" {selected}>{g["name"]}</option>')
+    return f'''<select class="select select-sm select-bordered"
+        onchange="window.location.href='/set-game?id=' + this.value">
+        {"".join(options)}
+    </select>'''
 
 
 def custom_root_template(context: RootTemplateContext) -> str:
@@ -157,6 +251,15 @@ def custom_root_template(context: RootTemplateContext) -> str:
     # Player selector
     player_selector = _render_player_selector(player_id)
 
+    # Game selector
+    game_id_value = current_game_id.get()
+    game_selector = _render_game_selector(game_id_value)
+
+    # Bottom padding for hand footer
+    player_role = current_player_role.get()
+    character_id = current_character_id.get()
+    footer_padding = "pb-28" if player_role == "player" and character_id else ""
+
     main_content = f"""
       <div
         data-phx-main="true"
@@ -177,8 +280,9 @@ def custom_root_template(context: RootTemplateContext) -> str:
           </label>
           <a href="/alive/" class="btn btn-ghost text-xl">Cardplay</a>
         </div>
-        <div class="flex-none gap-2">
+        <div class="flex-none flex items-center gap-2">
           {player_selector}
+          {game_selector}
           {render_theme_picker()}
         </div>
       </div>
@@ -207,7 +311,7 @@ def custom_root_template(context: RootTemplateContext) -> str:
     <body class="bg-base-200 min-h-screen">
       <div class="drawer lg:drawer-open">
         <input id="app-drawer" type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content">
+        <div class="drawer-content {footer_padding}">
           {navbar}
           {main_content}
         </div>
@@ -252,8 +356,9 @@ def create_app():
     django_wsgi_app = get_wsgi_application()
     app.mount("/admin", WSGIMiddleware(django_wsgi_app))
 
-    # Add player selection endpoint
+    # Add player and game selection endpoints
     app.routes.insert(0, Route("/set-player", set_player))
+    app.routes.insert(1, Route("/set-game", set_game))
 
     # Setup Alive
     setup_alive(app, url_prefix="/alive")
