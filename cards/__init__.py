@@ -1,0 +1,1 @@
+"""Cards app for cardplay."""
