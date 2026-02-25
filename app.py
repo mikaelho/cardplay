@@ -1,6 +1,5 @@
 """Main entry point for the cardplay application."""
 
-import contextvars
 import os
 import sys
 from pathlib import Path
@@ -27,12 +26,7 @@ import uvicorn
 import settings as django_settings
 from alive import setup_alive, set_event_loop, get_registered_models, render_theme_picker, render_theme_script, collect_static, static_url
 from cards.models import Player, Game, GameMembership, Character
-from cards.context import current_game_id, current_game_options, current_player_role, current_character_id
-
-# Context vars for passing session data to the sync root template
-_current_player_id = contextvars.ContextVar('current_player_id', default=None)
-_current_player_name = contextvars.ContextVar('current_player_name', default=None)
-_current_visible_urls = contextvars.ContextVar('current_visible_urls', default=None)
+from cards.context import current_game_id
 
 # Cached player list for the selector dropdown
 _player_options_cache = None
@@ -47,23 +41,8 @@ def _load_player_options_sync():
 SUPERUSER_SENTINEL = "super"
 
 
-def _render_player_selector(current_player_id):
-    """Render player selector dropdown HTML using cached player list."""
-    players = _player_options_cache or []
-    options = ['<option value="">-- Select Player --</option>']
-    super_selected = 'selected' if current_player_id == SUPERUSER_SENTINEL else ''
-    options.append(f'<option value="{SUPERUSER_SENTINEL}" {super_selected}>Superuser</option>')
-    for p in players:
-        selected = 'selected' if p["pk"] == current_player_id else ''
-        options.append(f'<option value="{p["pk"]}" {selected}>{p["name"]}</option>')
-    return f'''<select class="select select-sm select-bordered"
-        onchange="window.location.href='/set-player?id=' + this.value">
-        {"".join(options)}
-    </select>'''
-
-
 class PlayerContextMiddleware:
-    """ASGI middleware that copies player session data into contextvars."""
+    """ASGI middleware that sets contextvars needed by filter functions."""
 
     def __init__(self, app):
         self.app = app
@@ -75,23 +54,11 @@ class PlayerContextMiddleware:
                 await sync_to_async(_load_player_options_sync, thread_sensitive=False)()
 
             session = scope.get("session", {})
-            t1 = _current_player_id.set(session.get("player_id"))
-            t2 = _current_player_name.set(session.get("player_name"))
-            t3 = _current_visible_urls.set(session.get("visible_urls"))
-            t4 = current_game_id.set(session.get("game_id"))
-            t5 = current_game_options.set(session.get("game_options"))
-            t6 = current_player_role.set(session.get("player_role"))
-            t7 = current_character_id.set(session.get("character_id"))
+            t1 = current_game_id.set(session.get("game_id"))
             try:
                 await self.app(scope, receive, send)
             finally:
-                _current_player_id.reset(t1)
-                _current_player_name.reset(t2)
-                _current_visible_urls.reset(t3)
-                current_game_id.reset(t4)
-                current_game_options.reset(t5)
-                current_player_role.reset(t6)
-                current_character_id.reset(t7)
+                current_game_id.reset(t1)
         else:
             await self.app(scope, receive, send)
 
@@ -210,84 +177,49 @@ async def set_game(request):
     return RedirectResponse(url=referer, status_code=303)
 
 
-def _render_game_selector(game_id_value):
-    """Render game selector dropdown HTML using game options from contextvar."""
-    game_options = current_game_options.get()
-    if not game_options or len(game_options) <= 1:
-        return ''
-    options = []
-    for g in game_options:
-        selected = 'selected' if g["pk"] == game_id_value else ''
-        options.append(f'<option value="{g["pk"]}" {selected}>{g["name"]}</option>')
-    return f'''<select class="select select-sm select-bordered"
-        onchange="window.location.href='/set-game?id=' + this.value">
-        {"".join(options)}
-    </select>'''
+async def get_frame_context(session):
+    """Provide frame data for alive's LiveView templates."""
+    player_id = session.get("player_id")
+    visible_urls = session.get("visible_urls")
+
+    # Build sidebar models filtered by player visibility
+    if player_id is None:
+        sidebar = []
+    elif visible_urls is not None:
+        sidebar = [m for m in get_registered_models() if m["url"] in visible_urls]
+    else:
+        sidebar = get_registered_models()
+
+    # Build player options with Superuser entry
+    players = _player_options_cache or []
+    player_options = [{"pk": SUPERUSER_SENTINEL, "name": "Superuser"}] + list(players)
+
+    # Game selector visibility
+    game_options = session.get("game_options") or []
+    show_game_selector = len(game_options) > 1
+
+    return {
+        "app_title": "Cardplay",
+        "app_url": "/alive/",
+        "set_player_url": "/set-player?id=",
+        "set_game_url": "/set-game?id=",
+        "player_options": player_options,
+        "player_id": player_id,
+        "game_options": game_options,
+        "game_id": session.get("game_id"),
+        "show_game_selector": show_game_selector,
+        "sidebar_models": [{"url": m["url"], "title": m["title"]} for m in sidebar],
+        "theme_picker_html": render_theme_picker(),
+    }
 
 
 def custom_root_template(context: RootTemplateContext) -> str:
-    """Custom root template with drawer navigation."""
+    """Minimal root template — frame is rendered inside LiveView templates."""
     suffix = " | Cardplay"
     title = context.get("title") or "Cardplay"
     render_title = (title + suffix) if title else "Cardplay"
 
     additional_head_elements = "\n".join(context["additional_head_elements"])
-
-    # Build sidebar menu, filtered by player visibility
-    player_id = _current_player_id.get()
-    visible_urls = _current_visible_urls.get()
-    if player_id is None:
-        # No player selected - show no models
-        models = []
-    elif visible_urls is not None:
-        models = [m for m in get_registered_models() if m["url"] in visible_urls]
-    else:
-        models = get_registered_models()
-    sidebar_items = "\n".join([
-        f'<li><a href="{m["url"]}">{m["title"]}</a></li>'
-        for m in models
-    ])
-
-    # Player selector
-    player_selector = _render_player_selector(player_id)
-
-    # Game selector
-    game_id_value = current_game_id.get()
-    game_selector = _render_game_selector(game_id_value)
-
-    # Bottom padding for hand footer
-    player_role = current_player_role.get()
-    character_id = current_character_id.get()
-    footer_padding = "pb-28" if player_role == "player" and character_id else ""
-
-    main_content = f"""
-      <div
-        data-phx-main="true"
-        data-phx-session="{context["session"]}"
-        data-phx-static=""
-        id="phx-{context["id"]}"
-        >
-        {context["content"]}
-    </div>"""
-
-    navbar = f"""
-      <div class="navbar bg-base-100 shadow mb-4">
-        <div class="flex-1">
-          <label for="app-drawer" class="btn btn-ghost lg:hidden">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </label>
-          <a href="/alive/" class="btn btn-ghost text-xl">Cardplay</a>
-        </div>
-        <div class="flex-none flex items-center gap-2">
-          {player_selector}
-          {game_selector}
-          {render_theme_picker()}
-        </div>
-      </div>
-    """
-
     theme_script = render_theme_script("cardplay-theme")
 
     return f"""<!DOCTYPE html>
@@ -305,23 +237,18 @@ def custom_root_template(context: RootTemplateContext) -> str:
       <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
       <script src="{static_url('/django-static/alive/js/dragdrop.js')}"></script>
       <script src="{static_url('/django-static/alive/js/keyboard.js')}"></script>
+      <script src="{static_url('/django-static/alive/js/hexmap.js')}"></script>
       <script defer type="text/javascript" src="/static/assets/app.js"></script>
       {additional_head_elements}
     </head>
     <body class="bg-base-200 min-h-screen">
-      <div class="drawer lg:drawer-open">
-        <input id="app-drawer" type="checkbox" class="drawer-toggle" />
-        <div class="drawer-content {footer_padding}">
-          {navbar}
-          {main_content}
-        </div>
-        <div class="drawer-side">
-          <label for="app-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-          <ul class="menu bg-base-100 min-h-full w-64 p-4">
-            <li class="menu-title">Models</li>
-            {sidebar_items}
-          </ul>
-        </div>
+      <div
+        data-phx-main="true"
+        data-phx-session="{context["session"]}"
+        data-phx-static=""
+        id="phx-{context["id"]}"
+        >
+        {context["content"]}
       </div>
       {theme_script}
     </body>
@@ -360,8 +287,8 @@ def create_app():
     app.routes.insert(0, Route("/set-player", set_player))
     app.routes.insert(1, Route("/set-game", set_game))
 
-    # Setup Alive
-    setup_alive(app, url_prefix="/alive")
+    # Setup Alive with frame context provider
+    setup_alive(app, url_prefix="/alive", frame_context_provider=get_frame_context)
 
     # Add middleware (order matters: last added wraps outermost)
     # PlayerContextMiddleware must be inside SessionMiddleware

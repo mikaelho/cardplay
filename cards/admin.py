@@ -1,7 +1,7 @@
 """Admin configuration for cards."""
 
 from django.contrib import admin
-from .models import Tag, GameTemplate, Game, Player, Sheet, Character, Card, CharacterCard, GameMembership
+from .models import Tag, GameTemplate, Game, Player, Sheet, Character, Card, CharacterCard, GameMembership, Situation
 
 
 @admin.register(Tag)
@@ -52,3 +52,9 @@ class CharacterCardAdmin(admin.ModelAdmin):
 class GameMembershipAdmin(admin.ModelAdmin):
     list_display = ['player', 'game', 'role']
     list_filter = ['game', 'role']
+
+
+@admin.register(Situation)
+class SituationAdmin(admin.ModelAdmin):
+    list_display = ['name', 'game']
+    list_filter = ['game']

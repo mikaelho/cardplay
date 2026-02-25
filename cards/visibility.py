@@ -109,6 +109,47 @@ def filter_characters(qs, player_id):
     return qs.distinct()
 
 
+def filter_situations(qs, player_id):
+    """Superusers see all situations; others see situations in their games.
+    When a game is selected, further scopes to that game only."""
+    if _is_superuser(player_id):
+        game_id = current_game_id.get()
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        return qs
+    if player_id is None:
+        return qs.none()
+    from cards.models import GameMembership
+    game_ids = set(
+        GameMembership.objects.filter(player_id=player_id)
+        .values_list("game_id", flat=True)
+    )
+    game_id = current_game_id.get()
+    if game_id:
+        game_ids = game_ids & {game_id}
+    return qs.filter(game_id__in=game_ids).distinct()
+
+
+def filter_maps(qs, player_id):
+    """Same scoping as situations — filter by game membership."""
+    if _is_superuser(player_id):
+        game_id = current_game_id.get()
+        if game_id:
+            qs = qs.filter(game_id=game_id)
+        return qs
+    if player_id is None:
+        return qs.none()
+    from cards.models import GameMembership
+    game_ids = set(
+        GameMembership.objects.filter(player_id=player_id)
+        .values_list("game_id", flat=True)
+    )
+    game_id = current_game_id.get()
+    if game_id:
+        game_ids = game_ids & {game_id}
+    return qs.filter(game_id__in=game_ids).distinct()
+
+
 def filter_cards(qs, player_id):
     """Superusers see all cards; others see cards linked to characters in their games.
     When a game is selected, further scopes to that game only."""

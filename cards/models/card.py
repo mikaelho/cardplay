@@ -50,6 +50,22 @@ def get_bands_for_level(level: int) -> list[dict]:
     return result
 
 
+def get_band_for_die(level: int, die_value: int) -> str | None:
+    """Return which band label a die value falls into for a given level."""
+    band_str = bands.get(level, "231")
+    face = 1
+    for i in range(3):
+        count = int(band_str[i])
+        if count == 0:
+            face += count
+            continue
+        end = face + count - 1
+        if face <= die_value <= end:
+            return band_labels[i]
+        face = end + 1
+    return None
+
+
 success_bands = {  # Total fail is impossible, can be inverted for total fails, not sure if these will be used
     4: "015",
     3: "024",

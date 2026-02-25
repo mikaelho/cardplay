@@ -9,6 +9,9 @@ from .card import Card
 from .character_card import CharacterCard
 from .game_membership import GameMembership
 from .hand import Hand
+from .situation import Situation
+from .situation_card import SituationCard
+from .hex_map import HexMap
 
 __all__ = [
     "Tag",
@@ -22,4 +25,7 @@ __all__ = [
     "CharacterCard",
     "GameMembership",
     "Hand",
+    "Situation",
+    "SituationCard",
+    "HexMap",
 ]
