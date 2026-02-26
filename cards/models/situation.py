@@ -1,6 +1,6 @@
 from django.db import models
 from alive import AliveMixin, AliveConf
-from cards.visibility import character_visible, filter_situations
+from cards.visibility import card_visible, filter_situations
 
 SITUATION_TYPE_CHOICES = [
     ("situation", "Situation"),
@@ -16,7 +16,7 @@ class Situation(models.Model, AliveMixin):
         editable_fields=("name", "notes"),
         create_fields=("name", "game"),
         template="situation.html",
-        visible_to=character_visible,
+        visible_to=card_visible,
         filter_queryset=filter_situations,
     )
 

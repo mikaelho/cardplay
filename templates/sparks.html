@@ -1,0 +1,53 @@
+{% include "frame_top.html" %}
+<div class="container mx-auto p-4 max-w-5xl">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">Sparks &amp; Inspirations</h1>
+        <button class="btn btn-primary" phx-click="refresh">
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+            Refresh
+        </button>
+    </div>
+
+    {% for page in spark_pages %}
+    <div class="mb-8">
+        <h2 class="text-xl font-bold mb-3 text-base-content/70">{{page.name}}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for table in page.tables %}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="font-semibold text-sm text-base-content/50 uppercase tracking-wide">{{table.name}}</h3>
+                    <div class="flex gap-3 mt-1">
+                        <div>
+                            <div class="text-xs text-base-content/40">{{table.col1_name}}</div>
+                            <div class="text-lg font-medium">{{table.val1}}</div>
+                        </div>
+                        <div class="text-base-content/20 self-end text-lg">+</div>
+                        <div>
+                            <div class="text-xs text-base-content/40">{{table.col2_name}}</div>
+                            <div class="text-lg font-medium">{{table.val2}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+
+    <div class="mb-8">
+        <h2 class="text-xl font-bold mb-3 text-base-content/70">Inspirations</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {% for insp in inspirations %}
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body p-4">
+                    <h3 class="font-semibold text-sm text-base-content/50 uppercase tracking-wide">{{insp.name}}</h3>
+                    <div class="text-lg font-medium mt-1">{{insp.value}}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% include "frame_bottom.html" %}

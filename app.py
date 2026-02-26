@@ -27,6 +27,7 @@ import settings as django_settings
 from alive import setup_alive, set_event_loop, get_registered_models, render_theme_picker, render_theme_script, collect_static, static_url
 from cards.models import Player, Game, GameMembership, Character
 from cards.context import current_game_id
+from cards.sparks_view import create_sparks_liveview
 
 # Cached player list for the selector dropdown
 _player_options_cache = None
@@ -198,6 +199,13 @@ async def get_frame_context(session):
     game_options = session.get("game_options") or []
     show_game_selector = len(game_options) > 1
 
+    sidebar_items = [{"url": m["url"], "title": m["title"]} for m in sidebar]
+
+    # Add keeper-only pages
+    is_keeper = session.get("player_role") == "keeper" or session.get("player_superuser")
+    if is_keeper:
+        sidebar_items.append({"url": "/alive/sparks/", "title": "Sparks"})
+
     return {
         "app_title": "Cardplay",
         "app_url": "/alive/",
@@ -208,7 +216,7 @@ async def get_frame_context(session):
         "game_options": game_options,
         "game_id": session.get("game_id"),
         "show_game_selector": show_game_selector,
-        "sidebar_models": [{"url": m["url"], "title": m["title"]} for m in sidebar],
+        "sidebar_models": sidebar_items,
         "theme_picker_html": render_theme_picker(),
     }
 
@@ -313,6 +321,10 @@ def create_app():
 
     # Setup Alive with frame context provider
     setup_alive(app, url_prefix="/alive", frame_context_provider=get_frame_context)
+
+    # Register Sparks & Inspirations page (keeper-only)
+    sparks_view = create_sparks_liveview()
+    app.add_live_view("/alive/sparks/", sparks_view)
 
     # Add middleware (order matters: last added wraps outermost)
     # PlayerContextMiddleware must be inside SessionMiddleware
