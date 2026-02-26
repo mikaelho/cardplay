@@ -1,6 +1,36 @@
 # Cardplay
 
-A card game management application.
+A card-based roleplaying game management application.
+
+## Architecture
+
+Starlette app using **PyView** for the interactive frontend and **Django ORM** for data access. Django admin is served alongside via WSGIMiddleware.
+
+### Key points
+
+- **PyView + Starlette**: `app.py` creates the PyView app, mounts static files, and wires up middleware (session, player context).
+    - PyView uses **ibis templates** — similar to but distinct from Jinja2/Django templates.
+    - phx-submit sends values as **lists**.
+- **Django ORM**: Models live in `cards/models/`. Since the app is async, all ORM calls from the Starlette/PyView layer require `sync_to_async` or equivalent.
+- **Django Admin**: Mounted at `/admin/` via WSGIMiddleware. All models are registered in `cards/admin.py`.
+- **alive package**: Installed as an editable sibling (`../alive`). Provides generic CRUD UI generation, `AliveMixin`/`AliveConf` for model configuration, visibility filtering, drag-drop support, and JS hooks. Modify alive when generic behavior needs to change; keep cardplay-specific logic in this repo.
+- **cards app**: Contains all domain models and logic specific to playing card-based RPGs — games, players, characters, cards, hands, situations, hex maps, sheets/tags, and visibility rules (`cards/visibility.py`).
+- **Frontend**: Tailwind CSS + DaisyUI (CDN). Custom JS hooks in `staticfiles/alive/js/` for hex map interaction, drag-drop (Sortable.js), and keyboard shortcuts.
+- **Session & context**: `PlayerContextMiddleware` tracks current player, game, role (PLAYER/KEEPER), and character. Context vars like `current_game_id` scope ORM queries.
+
+### Directory layout
+
+```
+app.py              # Starlette/PyView entry point
+settings.py         # Django settings (SQLite, installed apps)
+urls.py             # Django URL config (admin)
+cards/              # Domain app
+  models/           # Django models (Game, Player, Character, Card, Situation, HexMap, etc.)
+  visibility.py     # Role-based visibility rules
+  context.py        # Context variables (game_id, player_id)
+  admin.py          # Django admin registration
+staticfiles/        # Static assets (admin + alive JS/CSS)
+```
 
 ## Setup
 
