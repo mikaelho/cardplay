@@ -42,6 +42,7 @@ class Situation(models.Model, AliveMixin):
         default="situation",
     )
     location = models.CharField(max_length=20, blank=True)
+    game_time = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return self.name

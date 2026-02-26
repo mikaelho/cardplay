@@ -15,7 +15,8 @@ Starlette app using **PyView** for the interactive frontend and **Django ORM** f
 - **Django Admin**: Mounted at `/admin/` via WSGIMiddleware. All models are registered in `cards/admin.py`.
 - **alive package**: Installed as an editable sibling (`../alive`). Provides generic CRUD UI generation, `AliveMixin`/`AliveConf` for model configuration, visibility filtering, drag-drop support, and JS hooks. Modify alive when generic behavior needs to change; keep cardplay-specific logic in this repo.
 - **cards app**: Contains all domain models and logic specific to playing card-based RPGs — games, players, characters, cards, hands, situations, hex maps, sheets/tags, and visibility rules (`cards/visibility.py`).
-- **Frontend**: Tailwind CSS + DaisyUI (CDN). Custom JS hooks in `staticfiles/alive/js/` for hex map interaction, drag-drop (Sortable.js), and keyboard shortcuts.
+- **Frontend**: Tailwind CSS v4 (browser build) + DaisyUI 5 (CDN). Custom JS hooks in `staticfiles/alive/js/` for hex map interaction, drag-drop (Sortable.js), and keyboard shortcuts. Note: Tailwind v4 browser build cannot generate responsive variants of DaisyUI component classes (e.g. `lg:drawer-open`), so these must be handled manually in CSS with media queries.
+- **Static files**: Django's `collectstatic` runs on app startup (`collect_static()` in alive). Static assets from alive are collected into `staticfiles/`.
 - **Session & context**: `PlayerContextMiddleware` tracks current player, game, role (PLAYER/KEEPER), and character. Context vars like `current_game_id` scope ORM queries.
 
 ### Directory layout

@@ -234,6 +234,30 @@ def custom_root_template(context: RootTemplateContext) -> str:
       <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
       <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
       <link rel="stylesheet" href="{static_url('/django-static/alive/css/alive.css')}">
+      <style>
+        /* Responsive drawer: DaisyUI drawer-open via media query
+           (Tailwind v4 browser build can't generate responsive variants of DaisyUI classes) */
+        @media (min-width: 1024px) {{
+            .drawer > .drawer-toggle {{ display: none !important; }}
+            .drawer > .drawer-toggle ~ .drawer-side {{
+                pointer-events: auto !important;
+                visibility: visible !important;
+                overscroll-behavior: auto !important;
+                opacity: 1 !important;
+                width: auto !important;
+                display: block !important;
+                position: sticky !important;
+                overflow-y: auto !important;
+            }}
+            .drawer > .drawer-toggle ~ .drawer-side > .drawer-overlay {{
+                cursor: default !important;
+                background-color: transparent !important;
+            }}
+            .drawer > .drawer-toggle ~ .drawer-side > :not(.drawer-overlay) {{
+                translate: 0% !important;
+            }}
+        }}
+      </style>
       <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
       <script src="{static_url('/django-static/alive/js/dragdrop.js')}"></script>
       <script src="{static_url('/django-static/alive/js/keyboard.js')}"></script>
