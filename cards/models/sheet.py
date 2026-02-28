@@ -8,8 +8,8 @@ class Sheet(models.Model, AliveMixin):
     """A sheet belonging to a game template, with available tags."""
 
     alive = AliveConf(
-        fields=("name", "template"),
-        editable_fields=("name", "template"),
+        fields=("name", "notes", "template"),
+        editable_fields=("name", "notes", "template"),
         tag_fields=(
             TagFieldConf(field_name="tags", scope_path="template"),
         ),
@@ -17,6 +17,7 @@ class Sheet(models.Model, AliveMixin):
     )
 
     name = models.CharField(max_length=100)
+    notes = models.TextField(blank=True, default="")
     template = models.ForeignKey(
         "GameTemplate",
         on_delete=models.CASCADE,

@@ -11,6 +11,7 @@ from pyview.meta import PyViewMeta
 
 from .sparks import SPARKS
 from .inspirations import INSPIRATIONS
+from .knights import KNIGHTS, MYTHS, SEERS
 
 TEMPLATE_PATH = str(Path(__file__).parent.parent / "templates" / "sparks.html")
 
@@ -37,6 +38,21 @@ def _roll_sparks():
     return result
 
 
+def _roll_knights_myths():
+    """Roll a random Knight and Myth (d6 + d12 each)."""
+    d6_k = random.randint(1, 6)
+    d12_k = random.randint(0, 11)
+    d6_m = random.randint(1, 6)
+    d12_m = random.randint(0, 11)
+    d6_s = random.randint(1, 6)
+    d12_s = random.randint(0, 11)
+    return {
+        "knight": KNIGHTS[d6_k][d12_k],
+        "myth": MYTHS[d6_m][d12_m],
+        "seer": SEERS[d6_s][d12_s],
+    }
+
+
 def _roll_inspirations():
     """Roll random values for all inspiration categories."""
     result = []
@@ -53,6 +69,7 @@ def _roll_inspirations():
 class SparksContext:
     frame: dict = field(default_factory=dict)
     spark_pages: list = field(default_factory=list)
+    knights_myths: dict = field(default_factory=dict)
     inspirations: list = field(default_factory=list)
     # Sidebar dice (needed by frame_bottom.html)
     quick_d6: int = 6
@@ -79,6 +96,7 @@ def create_sparks_liveview():
             socket.context = SparksContext(
                 frame=frame_data,
                 spark_pages=_roll_sparks(),
+                knights_myths=_roll_knights_myths(),
                 inspirations=_roll_inspirations(),
             )
             socket.context.quick_d6_svg = render_die_svg(socket.context.quick_d6, css_class="h-8 w-8")
@@ -86,6 +104,7 @@ def create_sparks_liveview():
         async def handle_event(self, event: str, payload: dict, socket: LiveViewSocket[SparksContext]):
             if event == "refresh":
                 socket.context.spark_pages = _roll_sparks()
+                socket.context.knights_myths = _roll_knights_myths()
                 socket.context.inspirations = _roll_inspirations()
             elif event == "quick_roll_d6":
                 socket.context.quick_d6 = random.randint(1, 6)

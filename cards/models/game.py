@@ -20,6 +20,7 @@ class Game(models.Model, AliveMixin):
         related_name="games",
     )
     game_time = models.JSONField(default=dict, blank=True)
+    spare_die = models.PositiveSmallIntegerField(null=True, blank=True, default=None)
 
     def __str__(self):
         return self.name
