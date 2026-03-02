@@ -14,6 +14,7 @@ class Sheet(models.Model, AliveMixin):
             TagFieldConf(field_name="tags", scope_path="template"),
         ),
         visible_to=superuser_only,
+        dive_to=("default_cards",),
     )
 
     name = models.CharField(max_length=100)

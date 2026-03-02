@@ -4,6 +4,7 @@ from .game import Game
 from .player import Player
 from .sheet import Sheet
 from .sheet_tag import SheetTag
+from .sheet_default_card import SheetDefaultCard
 from .character import Character
 from .card import Card
 from .character_card import CharacterCard
@@ -20,6 +21,7 @@ __all__ = [
     "Player",
     "Sheet",
     "SheetTag",
+    "SheetDefaultCard",
     "Character",
     "Card",
     "CharacterCard",
