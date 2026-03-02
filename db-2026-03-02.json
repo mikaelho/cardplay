@@ -1,0 +1,3257 @@
+[
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2026-02-19T15:12:17.317Z",
+    "user": 1,
+    "content_type": 18,
+    "object_id": "1",
+    "object_repr": "Test situation",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 1,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 1,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 1,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 1,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 3,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 3,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 3,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 3,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 2,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 2,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 2,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 2,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 4,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 4,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 4,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 4,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 5,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 5,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 5,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 5,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 6,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 6,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 6,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 6,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add card",
+    "content_type": 7,
+    "codename": "add_card"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change card",
+    "content_type": 7,
+    "codename": "change_card"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete card",
+    "content_type": 7,
+    "codename": "delete_card"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view card",
+    "content_type": 7,
+    "codename": "view_card"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add character",
+    "content_type": 8,
+    "codename": "add_character"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change character",
+    "content_type": 8,
+    "codename": "change_character"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete character",
+    "content_type": 8,
+    "codename": "delete_character"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view character",
+    "content_type": 8,
+    "codename": "view_character"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add game template",
+    "content_type": 11,
+    "codename": "add_gametemplate"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change game template",
+    "content_type": 11,
+    "codename": "change_gametemplate"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete game template",
+    "content_type": 11,
+    "codename": "delete_gametemplate"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view game template",
+    "content_type": 11,
+    "codename": "view_gametemplate"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add player",
+    "content_type": 12,
+    "codename": "add_player"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change player",
+    "content_type": 12,
+    "codename": "change_player"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete player",
+    "content_type": 12,
+    "codename": "delete_player"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view player",
+    "content_type": 12,
+    "codename": "view_player"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add character card",
+    "content_type": 9,
+    "codename": "add_charactercard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change character card",
+    "content_type": 9,
+    "codename": "change_charactercard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete character card",
+    "content_type": 9,
+    "codename": "delete_charactercard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view character card",
+    "content_type": 9,
+    "codename": "view_charactercard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add game",
+    "content_type": 10,
+    "codename": "add_game"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change game",
+    "content_type": 10,
+    "codename": "change_game"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete game",
+    "content_type": 10,
+    "codename": "delete_game"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view game",
+    "content_type": 10,
+    "codename": "view_game"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add sheet",
+    "content_type": 13,
+    "codename": "add_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change sheet",
+    "content_type": 13,
+    "codename": "change_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete sheet",
+    "content_type": 13,
+    "codename": "delete_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view sheet",
+    "content_type": 13,
+    "codename": "view_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add game membership",
+    "content_type": 14,
+    "codename": "add_gamemembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change game membership",
+    "content_type": 14,
+    "codename": "change_gamemembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete game membership",
+    "content_type": 14,
+    "codename": "delete_gamemembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view game membership",
+    "content_type": 14,
+    "codename": "view_gamemembership"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add tag",
+    "content_type": 15,
+    "codename": "add_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change tag",
+    "content_type": 15,
+    "codename": "change_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete tag",
+    "content_type": 15,
+    "codename": "delete_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view tag",
+    "content_type": 15,
+    "codename": "view_tag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 61,
+  "fields": {
+    "name": "Can add sheet tag",
+    "content_type": 16,
+    "codename": "add_sheettag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 62,
+  "fields": {
+    "name": "Can change sheet tag",
+    "content_type": 16,
+    "codename": "change_sheettag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 63,
+  "fields": {
+    "name": "Can delete sheet tag",
+    "content_type": 16,
+    "codename": "delete_sheettag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 64,
+  "fields": {
+    "name": "Can view sheet tag",
+    "content_type": 16,
+    "codename": "view_sheettag"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 65,
+  "fields": {
+    "name": "Can add hand",
+    "content_type": 17,
+    "codename": "add_hand"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 66,
+  "fields": {
+    "name": "Can change hand",
+    "content_type": 17,
+    "codename": "change_hand"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 67,
+  "fields": {
+    "name": "Can delete hand",
+    "content_type": 17,
+    "codename": "delete_hand"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 68,
+  "fields": {
+    "name": "Can view hand",
+    "content_type": 17,
+    "codename": "view_hand"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 69,
+  "fields": {
+    "name": "Can add situation",
+    "content_type": 18,
+    "codename": "add_situation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 70,
+  "fields": {
+    "name": "Can change situation",
+    "content_type": 18,
+    "codename": "change_situation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 71,
+  "fields": {
+    "name": "Can delete situation",
+    "content_type": 18,
+    "codename": "delete_situation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 72,
+  "fields": {
+    "name": "Can view situation",
+    "content_type": 18,
+    "codename": "view_situation"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 73,
+  "fields": {
+    "name": "Can add situation card",
+    "content_type": 19,
+    "codename": "add_situationcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 74,
+  "fields": {
+    "name": "Can change situation card",
+    "content_type": 19,
+    "codename": "change_situationcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 75,
+  "fields": {
+    "name": "Can delete situation card",
+    "content_type": 19,
+    "codename": "delete_situationcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 76,
+  "fields": {
+    "name": "Can view situation card",
+    "content_type": 19,
+    "codename": "view_situationcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 77,
+  "fields": {
+    "name": "Can add hex map",
+    "content_type": 20,
+    "codename": "add_hexmap"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 78,
+  "fields": {
+    "name": "Can change hex map",
+    "content_type": 20,
+    "codename": "change_hexmap"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 79,
+  "fields": {
+    "name": "Can delete hex map",
+    "content_type": 20,
+    "codename": "delete_hexmap"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 80,
+  "fields": {
+    "name": "Can view hex map",
+    "content_type": 20,
+    "codename": "view_hexmap"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 81,
+  "fields": {
+    "name": "Can add sheet default card",
+    "content_type": 21,
+    "codename": "add_sheetdefaultcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 82,
+  "fields": {
+    "name": "Can change sheet default card",
+    "content_type": 21,
+    "codename": "change_sheetdefaultcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 83,
+  "fields": {
+    "name": "Can delete sheet default card",
+    "content_type": 21,
+    "codename": "delete_sheetdefaultcard"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 84,
+  "fields": {
+    "name": "Can view sheet default card",
+    "content_type": 21,
+    "codename": "view_sheetdefaultcard"
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$1200000$FmFNyQ2ET6sPZYpbG5u7L4$D9ByV3Hv5VwRXl2etaQ9GeKZ3LnO+e2EMiVZ0Y31SHw=",
+    "last_login": "2026-02-19T15:11:27.043Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2026-02-15T11:09:02.619Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 1,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 2,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 3,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 4,
+  "fields": {
+    "app_label": "auth",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 5,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 6,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 7,
+  "fields": {
+    "app_label": "cards",
+    "model": "card"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 8,
+  "fields": {
+    "app_label": "cards",
+    "model": "character"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 9,
+  "fields": {
+    "app_label": "cards",
+    "model": "charactercard"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 10,
+  "fields": {
+    "app_label": "cards",
+    "model": "game"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 11,
+  "fields": {
+    "app_label": "cards",
+    "model": "gametemplate"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 12,
+  "fields": {
+    "app_label": "cards",
+    "model": "player"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 13,
+  "fields": {
+    "app_label": "cards",
+    "model": "sheet"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 14,
+  "fields": {
+    "app_label": "cards",
+    "model": "gamemembership"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 15,
+  "fields": {
+    "app_label": "cards",
+    "model": "tag"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 16,
+  "fields": {
+    "app_label": "cards",
+    "model": "sheettag"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 17,
+  "fields": {
+    "app_label": "cards",
+    "model": "hand"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 18,
+  "fields": {
+    "app_label": "cards",
+    "model": "situation"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 19,
+  "fields": {
+    "app_label": "cards",
+    "model": "situationcard"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 20,
+  "fields": {
+    "app_label": "cards",
+    "model": "hexmap"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "pk": 21,
+  "fields": {
+    "app_label": "cards",
+    "model": "sheetdefaultcard"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "d4o4l1aqowtl6x44oyznwqxviwdk2eit",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hCBKRaX7j0DmYEZqRpISrsy3l2bdKHb_977LxVxXUpcO89xyuqsjDr8boTpwXUD-Y711nRqdZkn0puid9r1tWV-Xnb376BgL98aDBwHa03G7ByEkZwB8jhYDwFGOIF49CGlEBKSIxFiI4wChjkIOPX-AMALOAY:1vra0T:i0j8nmbUz4sQ0Vj0324bQQO1_fTbON9LGejSMUhQp6A",
+    "expire_date": "2026-03-01T11:09:41.297Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "pk": "ujj3yo1br20gphorkgveo8rwssglf0lf",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hCBKRaX7j0DmYEZqRpISrsy3l2bdKHb_977LxVxXUpcO89xyuqsjDr8boTpwXUD-Y711nRqdZkn0puid9r1tWV-Xnb376BgL98aDBwHa03G7ByEkZwB8jhYDwFGOIF49CGlEBKSIxFiI4wChjkIOPX-AMALOAY:1vt5gd:CABDCqemhqGP3b4e4YJkNxan7wN2C3hv5bZsKTyEHuw",
+    "expire_date": "2026-03-05T15:11:27.044Z"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 1,
+  "fields": {
+    "name": "Weapon"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 2,
+  "fields": {
+    "name": "Armor"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 3,
+  "fields": {
+    "name": "Ability"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 4,
+  "fields": {
+    "name": "Horse"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 5,
+  "fields": {
+    "name": "Gear"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 6,
+  "fields": {
+    "name": "Wound"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 7,
+  "fields": {
+    "name": "Passion"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 8,
+  "fields": {
+    "name": "Steed"
+  }
+},
+{
+  "model": "cards.tag",
+  "pk": 9,
+  "fields": {
+    "name": "Attribute"
+  }
+},
+{
+  "model": "cards.gametemplate",
+  "pk": 1,
+  "fields": {
+    "name": "Mythic Dark",
+    "tags": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9
+    ]
+  }
+},
+{
+  "model": "cards.game",
+  "pk": 1,
+  "fields": {
+    "name": "Mythic Demo",
+    "template": 1,
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 3,
+      "shift": "morning"
+    },
+    "spare_die": 6
+  }
+},
+{
+  "model": "cards.game",
+  "pk": 2,
+  "fields": {
+    "name": "Mythic Dark",
+    "template": 1,
+    "game_time": {
+      "age": "",
+      "year": 1,
+      "season": "spring",
+      "day": 1,
+      "shift": "morning"
+    },
+    "spare_die": null
+  }
+},
+{
+  "model": "cards.player",
+  "pk": 1,
+  "fields": {
+    "name": "Julle",
+    "superuser": false
+  }
+},
+{
+  "model": "cards.player",
+  "pk": 2,
+  "fields": {
+    "name": "Mikael",
+    "superuser": false
+  }
+},
+{
+  "model": "cards.player",
+  "pk": 3,
+  "fields": {
+    "name": "Demo Julle",
+    "superuser": false
+  }
+},
+{
+  "model": "cards.player",
+  "pk": 4,
+  "fields": {
+    "name": "Pasi",
+    "superuser": false
+  }
+},
+{
+  "model": "cards.sheet",
+  "pk": 1,
+  "fields": {
+    "name": "Keeper",
+    "notes": "",
+    "template": 1
+  }
+},
+{
+  "model": "cards.sheet",
+  "pk": 2,
+  "fields": {
+    "name": "Vanguard",
+    "notes": "Age:\n\n- Young\n- Mature\n- Old\n\nRank:\n\n- Nomad\n- Envoy\n- Warden\n- Overseer\n- Primary",
+    "template": 1
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 1,
+  "fields": {
+    "sheet": 1,
+    "tag": 4,
+    "position": 0
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 2,
+  "fields": {
+    "sheet": 2,
+    "tag": 1,
+    "position": 1
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 3,
+  "fields": {
+    "sheet": 2,
+    "tag": 2,
+    "position": 2
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 4,
+  "fields": {
+    "sheet": 2,
+    "tag": 3,
+    "position": 5
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 6,
+  "fields": {
+    "sheet": 2,
+    "tag": 5,
+    "position": 4
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 7,
+  "fields": {
+    "sheet": 2,
+    "tag": 6,
+    "position": 7
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 8,
+  "fields": {
+    "sheet": 2,
+    "tag": 7,
+    "position": 6
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 10,
+  "fields": {
+    "sheet": 2,
+    "tag": 8,
+    "position": 3
+  }
+},
+{
+  "model": "cards.sheettag",
+  "pk": 11,
+  "fields": {
+    "sheet": 2,
+    "tag": 9,
+    "position": 0
+  }
+},
+{
+  "model": "cards.sheetdefaultcard",
+  "pk": 1,
+  "fields": {
+    "sheet": 2,
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs.",
+    "tag": 9
+  }
+},
+{
+  "model": "cards.sheetdefaultcard",
+  "pk": 2,
+  "fields": {
+    "sheet": 2,
+    "name": "Clarity",
+    "notes": "Keen instinct, lucid mind, shrewd eyes.",
+    "tag": 9
+  }
+},
+{
+  "model": "cards.sheetdefaultcard",
+  "pk": 3,
+  "fields": {
+    "sheet": 2,
+    "name": "Spirit",
+    "notes": "Charming tongue, iron will, fierce heart.",
+    "tag": 9
+  }
+},
+{
+  "model": "cards.character",
+  "pk": 1,
+  "fields": {
+    "name": "Keeper",
+    "callsign": "Overlord",
+    "game": 1,
+    "player": 2,
+    "sheet": 1,
+    "notes": ""
+  }
+},
+{
+  "model": "cards.character",
+  "pk": 2,
+  "fields": {
+    "name": "General Settings",
+    "callsign": "Thunder",
+    "game": 1,
+    "player": 3,
+    "sheet": 2,
+    "notes": "*Thunder! Should be felt, not heard, else call it a whimper!*"
+  }
+},
+{
+  "model": "cards.character",
+  "pk": 4,
+  "fields": {
+    "name": "Jago the Emerald",
+    "callsign": "Emerald",
+    "game": 2,
+    "player": 1,
+    "sheet": 2,
+    "notes": "*A verdant cloak on sable steed  \nNeath nature’s veil, yond sight and heed*\n\n- Age: Young\n- Rank: Nomad\n\nJago has the Box of Stone Heart Weapon"
+  }
+},
+{
+  "model": "cards.character",
+  "pk": 5,
+  "fields": {
+    "name": "Ruskyn the Ratkin",
+    "callsign": "Rat",
+    "game": 2,
+    "player": 4,
+    "sheet": 2,
+    "notes": "*In squeakling hole I squashed and curled  \nAmidst my kin, a kinder world*\n\n- Age: Young\n- Rank: Nomad"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 1,
+  "fields": {
+    "name": "Skittish horse",
+    "notes": "Sample card"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 2,
+  "fields": {
+    "name": "Bug in a black metal box",
+    "notes": "- A bright and noble creature.\n- Can slowly eat through metal. "
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 3,
+  "fields": {
+    "name": "Assault rifle",
+    "notes": "With grenade launcher - make some noise!"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 4,
+  "fields": {
+    "name": "Overfed steed",
+    "notes": "Thunder of feet, trample anything"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 5,
+  "fields": {
+    "name": "Helmet with a megaphone",
+    "notes": "Can be heard over the noise of battle, or in all adjacent Hexes"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 6,
+  "fields": {
+    "name": "Flak jacket",
+    "notes": "Standard issue"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 7,
+  "fields": {
+    "name": "Discord",
+    "notes": "Restore spirits by disrupting a place of order"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 8,
+  "fields": {
+    "name": "Riot shield",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 9,
+  "fields": {
+    "name": "Flash bangs",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 11,
+  "fields": {
+    "name": "Veterans",
+    "notes": "Weary of all the fighting"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 12,
+  "fields": {
+    "name": "Listening gear",
+    "notes": "When placed against a wall, hear everything from the other side in perfect clarity."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 13,
+  "fields": {
+    "name": "Verminform",
+    "notes": "Take the form of a rat to squeeze into any\nspace that a rat could fit into. You return to\nyour normal form as soon as you are in a\nspace that allows it. You can also speak with\nrats, who are generally helpful."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 14,
+  "fields": {
+    "name": "Trust",
+    "notes": "Restore spirits when giving the benefit of the\ndoubt in a way that leaves you vulnerable."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 15,
+  "fields": {
+    "name": "Matted steed",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 16,
+  "fields": {
+    "name": "Modified Armor",
+    "notes": "Organic, camoflage against natural background, quick to put/remove"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 17,
+  "fields": {
+    "name": "Short-nosed assault rifle",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 18,
+  "fields": {
+    "name": "Automatic pistol",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 19,
+  "fields": {
+    "name": "Combat knife",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 20,
+  "fields": {
+    "name": "Sable Steed",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 21,
+  "fields": {
+    "name": "Fade to Green",
+    "notes": "Use when hiding still and silent in greenery.\nYou cannot be found by any means. While\nhiding you can only make animal calls without revealing yourself, but also\nbenefit from a heightened sense of vision for detail."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 22,
+  "fields": {
+    "name": "Elegance",
+    "notes": "Restore spirits when you leave a place more\nbeautiful than you found it."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 23,
+  "fields": {
+    "name": "Poisoned dagger",
+    "notes": "(Poison pumped into target on cut)"
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 24,
+  "fields": {
+    "name": "Branchspear",
+    "notes": "When stabbed into a tree it is immovable by anyone but you."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 25,
+  "fields": {
+    "name": "Silenced sniper rifle",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 26,
+  "fields": {
+    "name": "Ankle piece",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 27,
+  "fields": {
+    "name": "Verdant cloak",
+    "notes": ""
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 28,
+  "fields": {
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 29,
+  "fields": {
+    "name": "Clarity",
+    "notes": "Keen instinct, lucid mind, shrewd eyes."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 30,
+  "fields": {
+    "name": "Spirit",
+    "notes": "Charming tongue, iron will, fierce heart."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 31,
+  "fields": {
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 32,
+  "fields": {
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 33,
+  "fields": {
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 34,
+  "fields": {
+    "name": "Vigour",
+    "notes": "Strong limbs, firm hands, powerful lungs."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 35,
+  "fields": {
+    "name": "Clarity",
+    "notes": "Keen instinct, lucid mind, shrewd eyes."
+  }
+},
+{
+  "model": "cards.card",
+  "pk": 36,
+  "fields": {
+    "name": "Spirit",
+    "notes": "Charming tongue, iron will, fierce heart."
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 1,
+  "fields": {
+    "character": 1,
+    "card": 1,
+    "level": 4,
+    "tag": 4
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 2,
+  "fields": {
+    "character": 2,
+    "card": 2,
+    "level": 5,
+    "tag": 5
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 3,
+  "fields": {
+    "character": 2,
+    "card": 3,
+    "level": 1,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 4,
+  "fields": {
+    "character": 2,
+    "card": 4,
+    "level": 4,
+    "tag": 4
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 5,
+  "fields": {
+    "character": 2,
+    "card": 5,
+    "level": 4,
+    "tag": 2
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 6,
+  "fields": {
+    "character": 2,
+    "card": 6,
+    "level": 4,
+    "tag": 2
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 7,
+  "fields": {
+    "character": 2,
+    "card": 7,
+    "level": 10,
+    "tag": 7
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 8,
+  "fields": {
+    "character": 2,
+    "card": 8,
+    "level": 4,
+    "tag": 2
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 9,
+  "fields": {
+    "character": 2,
+    "card": 9,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 10,
+  "fields": {
+    "character": 1,
+    "card": 11,
+    "level": 4,
+    "tag": null
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 11,
+  "fields": {
+    "character": 5,
+    "card": 12,
+    "level": 4,
+    "tag": 5
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 12,
+  "fields": {
+    "character": 5,
+    "card": 13,
+    "level": 5,
+    "tag": 3
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 13,
+  "fields": {
+    "character": 5,
+    "card": 14,
+    "level": 4,
+    "tag": 7
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 14,
+  "fields": {
+    "character": 5,
+    "card": 15,
+    "level": 4,
+    "tag": 8
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 15,
+  "fields": {
+    "character": 5,
+    "card": 16,
+    "level": 5,
+    "tag": 2
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 16,
+  "fields": {
+    "character": 5,
+    "card": 17,
+    "level": 6,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 17,
+  "fields": {
+    "character": 5,
+    "card": 18,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 18,
+  "fields": {
+    "character": 5,
+    "card": 19,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 19,
+  "fields": {
+    "character": 4,
+    "card": 20,
+    "level": 4,
+    "tag": 8
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 20,
+  "fields": {
+    "character": 4,
+    "card": 21,
+    "level": 5,
+    "tag": 3
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 21,
+  "fields": {
+    "character": 4,
+    "card": 22,
+    "level": 6,
+    "tag": 7
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 22,
+  "fields": {
+    "character": 4,
+    "card": 23,
+    "level": 5,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 23,
+  "fields": {
+    "character": 4,
+    "card": 24,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 24,
+  "fields": {
+    "character": 4,
+    "card": 25,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 25,
+  "fields": {
+    "character": 4,
+    "card": 26,
+    "level": 4,
+    "tag": 1
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 26,
+  "fields": {
+    "character": 4,
+    "card": 27,
+    "level": 4,
+    "tag": 2
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 27,
+  "fields": {
+    "character": 4,
+    "card": 28,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 28,
+  "fields": {
+    "character": 4,
+    "card": 29,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 29,
+  "fields": {
+    "character": 4,
+    "card": 30,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 30,
+  "fields": {
+    "character": 5,
+    "card": 34,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 31,
+  "fields": {
+    "character": 5,
+    "card": 35,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.charactercard",
+  "pk": 32,
+  "fields": {
+    "character": 5,
+    "card": 36,
+    "level": 4,
+    "tag": 9
+  }
+},
+{
+  "model": "cards.gamemembership",
+  "pk": 1,
+  "fields": {
+    "player": 2,
+    "game": 1,
+    "role": "keeper"
+  }
+},
+{
+  "model": "cards.gamemembership",
+  "pk": 3,
+  "fields": {
+    "player": 2,
+    "game": 2,
+    "role": "keeper"
+  }
+},
+{
+  "model": "cards.gamemembership",
+  "pk": 4,
+  "fields": {
+    "player": 1,
+    "game": 2,
+    "role": "player"
+  }
+},
+{
+  "model": "cards.gamemembership",
+  "pk": 5,
+  "fields": {
+    "player": 3,
+    "game": 1,
+    "role": "player"
+  }
+},
+{
+  "model": "cards.gamemembership",
+  "pk": 6,
+  "fields": {
+    "player": 4,
+    "game": 2,
+    "role": "player"
+  }
+},
+{
+  "model": "cards.hand",
+  "pk": 3,
+  "fields": {
+    "name": "Hand",
+    "character": 2,
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 2,
+  "fields": {
+    "name": "Testing situation",
+    "notes": "",
+    "game": 1,
+    "dice": [
+      1,
+      6,
+      2
+    ],
+    "assignments": {
+      "1": 1,
+      "2": 2
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "situation",
+    "location": "",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 3,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "5,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 4,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "6,7",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 5,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "7,7",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 6,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "7,8",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 7,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "8,9",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 8,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "9,8",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 9,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "8,8",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 10,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "7,7",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 11,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "7,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 12,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "6,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 13,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "5,5",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 14,
+  "fields": {
+    "name": "",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "event",
+    "location": "4,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 15,
+  "fields": {
+    "name": "Getting close to the seat of power",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "note",
+    "location": "5,4",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 16,
+  "fields": {
+    "name": "RUNNING AWAY",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": true,
+    "situation_type": "note",
+    "location": "9,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 17,
+  "fields": {
+    "name": "Did not get away",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": true,
+    "situation_type": "note",
+    "location": "9,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 18,
+  "fields": {
+    "name": "Uusi juttu",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": true,
+    "situation_type": "note",
+    "location": "9,6",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 19,
+  "fields": {
+    "name": "Uusi paikka",
+    "notes": "",
+    "game": 1,
+    "dice": [
+      6,
+      3,
+      1,
+      3,
+      1
+    ],
+    "assignments": {
+      "4": 0,
+      "5": 3,
+      "6": 1,
+      "3": 2
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "note",
+    "location": "9,7",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 22,
+  "fields": {
+    "name": "Sneaking awayyy",
+    "notes": "I still add notes, hahaa!",
+    "game": 1,
+    "dice": [
+      2,
+      2,
+      3
+    ],
+    "assignments": {
+      "7": 1,
+      "8": 2
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "situation",
+    "location": "9,7",
+    "game_time": {},
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 23,
+  "fields": {
+    "name": "New age starts",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "note",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 1,
+      "shift": "morning"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 24,
+  "fields": {
+    "name": "Day advances",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "note",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 1,
+      "shift": "afternoon"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 25,
+  "fields": {
+    "name": "Next day",
+    "notes": "",
+    "game": 1,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "note",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 2,
+      "shift": "night"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 26,
+  "fields": {
+    "name": "New sitch",
+    "notes": "",
+    "game": 1,
+    "dice": [
+      4,
+      1,
+      4,
+      1
+    ],
+    "assignments": {
+      "10": 2,
+      "9": 0,
+      "11": 1
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "situation",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 3,
+      "shift": "morning"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 27,
+  "fields": {
+    "name": "Rolling forward",
+    "notes": "",
+    "game": 1,
+    "dice": [
+      4,
+      5,
+      3
+    ],
+    "assignments": {
+      "13": 2,
+      "12": 0
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "situation",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 3,
+      "shift": "morning"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 28,
+  "fields": {
+    "name": "Rolled from previous",
+    "notes": "",
+    "game": 1,
+    "dice": [
+      5,
+      6,
+      2
+    ],
+    "assignments": {
+      "14": 0
+    },
+    "dice_assigned": true,
+    "resolved": true,
+    "situation_type": "situation",
+    "location": "9,7",
+    "game_time": {
+      "age": "First Age",
+      "year": 1,
+      "season": "spring",
+      "day": 3,
+      "shift": "morning"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situation",
+  "pk": 29,
+  "fields": {
+    "name": "By the big skeleton",
+    "notes": "Who's here?\n\n- Jago, callsign Emerald\n- Ruskyn, callsign Rat\n\nWhat happens?\n\n- Jago experiments with the intertwined chair, and crosses the river, there and back, naked and wet\n- Jago makes the skeleton's skull pretty\n- Jago takes the box containing the stone heart\n",
+    "game": 2,
+    "dice": [],
+    "assignments": {},
+    "dice_assigned": false,
+    "resolved": false,
+    "situation_type": "note",
+    "location": "4,2",
+    "game_time": {
+      "age": "",
+      "year": 1,
+      "season": "spring",
+      "day": 1,
+      "shift": "morning"
+    },
+    "cards": []
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 1,
+  "fields": {
+    "situation": 2,
+    "name": "Assault rifle",
+    "notes": "With grenade launcher - make some noise!",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 2,
+  "fields": {
+    "situation": 2,
+    "name": "Riot shield",
+    "notes": "",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 3,
+  "fields": {
+    "situation": 19,
+    "name": "Overfed steed",
+    "notes": "Thunder of feet, trample anything",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 4,
+  "fields": {
+    "situation": 19,
+    "name": "Helmet with a megaphone",
+    "notes": "Can be heard over the noise of battle, or in all adjacent Hexes",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 5,
+  "fields": {
+    "situation": 19,
+    "name": "Flak jacket",
+    "notes": "Standard issue",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 6,
+  "fields": {
+    "situation": 19,
+    "name": "Riot shield",
+    "notes": "",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 7,
+  "fields": {
+    "situation": 22,
+    "name": "Assault rifle",
+    "notes": "With grenade launcher - make some noise!",
+    "level": 1,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 8,
+  "fields": {
+    "situation": 22,
+    "name": "Veterans",
+    "notes": "Weary of all the fighting",
+    "level": 4,
+    "character_name": "Keeper",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 9,
+  "fields": {
+    "situation": 26,
+    "name": "Overfed steed",
+    "notes": "Thunder of feet, trample anything",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 10,
+  "fields": {
+    "situation": 26,
+    "name": "Helmet with a megaphone",
+    "notes": "Can be heard over the noise of battle, or in all adjacent Hexes",
+    "level": 4,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 11,
+  "fields": {
+    "situation": 26,
+    "name": "Discord",
+    "notes": "Restore spirits by disrupting a place of order",
+    "level": 10,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 12,
+  "fields": {
+    "situation": 27,
+    "name": "Skittish horse",
+    "notes": "Sample card",
+    "level": 3,
+    "character_name": "Keeper",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 13,
+  "fields": {
+    "situation": 27,
+    "name": "Veterans",
+    "notes": "Weary of all the fighting",
+    "level": 4,
+    "character_name": "Keeper",
+    "used": true
+  }
+},
+{
+  "model": "cards.situationcard",
+  "pk": 14,
+  "fields": {
+    "situation": 28,
+    "name": "Bug in a black metal box",
+    "notes": "- A bright and noble creature.\n- Can slowly eat through metal. ",
+    "level": 5,
+    "character_name": "General Settings",
+    "used": true
+  }
+},
+{
+  "model": "cards.hexmap",
+  "pk": 1,
+  "fields": {
+    "name": "Map",
+    "game": 1,
+    "hexes": {
+      "3,6": "hills",
+      "3,1": "hills",
+      "5,3": "lake",
+      "6,4": "lake",
+      "5,4": "grass",
+      "7,4": "lake",
+      "6,5": "lake",
+      "1,9": "lake",
+      "1,10": "lake",
+      "4,3": "lake",
+      "4,4": "castle",
+      "4,1": "hills",
+      "4,2": "hills",
+      "0,6": "hills",
+      "1,6": "hills",
+      "2,7": "hills",
+      "4,7": "hills",
+      "5,7": "hills",
+      "4,8": "hills",
+      "4,9": "hills",
+      "2,10": "lake",
+      "2,9": "tower",
+      "4,5": "grass",
+      "5,5": "grass",
+      "6,6": "grass",
+      "9,1": "fortress",
+      "2,11": "vertical_caves",
+      "1,11": "vertical_caves",
+      "0,11": "vertical_caves",
+      "0,10": "vertical_caves",
+      "0,9": "vertical_caves",
+      "0,8": "vertical_caves",
+      "0,7": "vertical_caves",
+      "1,7": "vertical_caves",
+      "1,8": "vertical_caves",
+      "2,8": "fungal_forest",
+      "3,7": "fungal_forest",
+      "3,8": "fungal_forest",
+      "2,6": "vertical_caves",
+      "1,5": "vertical_caves",
+      "1,4": "vertical_caves",
+      "0,5": "vertical_caves",
+      "0,4": "vertical_caves",
+      "0,3": "vertical_caves",
+      "1,3": "vertical_caves",
+      "1,2": "fungal_forest",
+      "1,1": "fungal_forest",
+      "1,0": "fungal_forest",
+      "0,0": "fungal_forest",
+      "0,1": "fungal_forest",
+      "0,2": "fungal_forest",
+      "2,0": "fungal_forest",
+      "2,1": "fungal_forest",
+      "2,2": "fungal_forest",
+      "2,3": "mushroom",
+      "2,4": "vertical_caves",
+      "8,0": "vertical_caves",
+      "9,0": "vertical_caves",
+      "10,1": "mushroom",
+      "11,1": "vertical_caves",
+      "11,0": "vertical_caves",
+      "10,0": "vertical_caves",
+      "8,1": "vertical_caves",
+      "10,2": "mushroom",
+      "11,10": "grass",
+      "11,9": "grass",
+      "10,10": "grass",
+      "9,9": "grass",
+      "10,9": "grass",
+      "11,8": "swamp",
+      "11,7": "swamp",
+      "10,8": "swamp",
+      "9,8": "mushroom",
+      "8,9": "mushroom",
+      "7,8": "mushroom",
+      "8,8": "mushroom",
+      "7,7": "cavern_city",
+      "7,11": "vertical_caves",
+      "6,11": "vertical_caves",
+      "6,10": "vertical_caves",
+      "5,11": "vertical_caves",
+      "3,11": "grass",
+      "4,11": "grass",
+      "3,10": "grass",
+      "4,10": "grass",
+      "5,10": "grass",
+      "5,9": "grass",
+      "5,8": "grass",
+      "6,7": "grass",
+      "7,6": "grass",
+      "8,6": "grass",
+      "7,5": "grass",
+      "7,3": "vertical_caves",
+      "11,2": "vertical_caves",
+      "10,3": "vertical_caves",
+      "9,3": "spikes",
+      "9,2": "spikes",
+      "8,3": "spikes",
+      "8,2": "spikes",
+      "8,7": "spikes",
+      "9,7": "spikes",
+      "10,7": "spikes",
+      "9,6": "spikes",
+      "11,6": "floating_rocks",
+      "10,6": "vertical_caves",
+      "9,5": "vertical_caves",
+      "10,5": "floating_rocks",
+      "11,5": "vertical_caves",
+      "4,0": "hills",
+      "5,0": "floating_rocks",
+      "6,0": "floating_rocks",
+      "7,0": "floating_rocks",
+      "7,1": "vertical_caves",
+      "6,1": "hills",
+      "5,1": "hills",
+      "5,2": "hills",
+      "3,0": "spikes",
+      "3,2": "mushroom",
+      "3,3": "mushroom",
+      "3,9": "hills",
+      "3,5": "hills",
+      "2,5": "hills",
+      "3,4": "mushroom",
+      "4,6": "hills",
+      "6,8": "hills",
+      "6,9": "hills",
+      "7,9": "hills",
+      "7,10": "hills",
+      "8,11": "hills",
+      "5,6": "hills",
+      "8,4": "vertical_caves",
+      "8,5": "vertical_caves",
+      "9,4": "hills",
+      "10,4": "hills",
+      "11,3": "hills",
+      "11,4": "hills",
+      "6,3": "hills",
+      "7,2": "vertical_caves",
+      "6,2": "hills",
+      "8,10": "cliff",
+      "9,10": "cliff",
+      "10,11": "cliff",
+      "11,11": "cliff",
+      "9,11": "cliff"
+    },
+    "rivers": [
+      [
+        "4,0",
+        "4,1",
+        "3,1",
+        "4,2"
+      ],
+      [
+        "0,6",
+        "1,6",
+        "2,7",
+        "3,6",
+        "4,7",
+        "5,7",
+        "4,8",
+        "4,9",
+        "3,9"
+      ],
+      [
+        "5,7",
+        "6,8",
+        "6,9",
+        "7,9",
+        "7,10",
+        "8,11"
+      ]
+    ],
+    "overlays": {
+      "3,10": "monument",
+      "5,10": "ruins",
+      "9,9": "ruins",
+      "11,6": "sanctum",
+      "2,1": "monument",
+      "5,0": "monument",
+      "5,6": "ruins",
+      "8,7": "sanctum",
+      "7,3": "sanctum",
+      "6,2": "dwellings",
+      "11,4": "dwellings",
+      "0,9": "dwellings",
+      "2,8": "curse",
+      "8,2": "curse",
+      "2,4": "curse",
+      "11,7": "hazard",
+      "7,10": "hazard",
+      "1,2": "myth",
+      "1,7": "myth",
+      "9,10": "myth",
+      "7,0": "myth",
+      "9,5": "myth",
+      "3,11": "myth"
+    },
+    "barriers": {
+      "9,1": [
+        4
+      ],
+      "8,1": [
+        2
+      ],
+      "10,2": [
+        2
+      ],
+      "5,5": [
+        2
+      ],
+      "4,6": [
+        1
+      ],
+      "1,6": [
+        1
+      ],
+      "1,8": [
+        1
+      ],
+      "0,9": [
+        1
+      ],
+      "3,8": [
+        0
+      ],
+      "1,4": [
+        1
+      ],
+      "10,10": [
+        1
+      ],
+      "9,7": [
+        1
+      ],
+      "10,5": [
+        1
+      ],
+      "9,9": [
+        2
+      ],
+      "11,6": [
+        2
+      ],
+      "5,2": [
+        2
+      ],
+      "6,10": [
+        2
+      ],
+      "5,7": [
+        1
+      ],
+      "1,0": [
+        0
+      ],
+      "1,3": [
+        0
+      ],
+      "3,0": [
+        0
+      ],
+      "9,3": [
+        0
+      ],
+      "8,4": [
+        0
+      ]
+    },
+    "notes": {
+      "4,4": "Seat of Power\n\n- Myghal, the Primary, Boulder (3/5)",
+      "5,5": "Testing:\n\n- One\n- Two",
+      "4,6": "Some hills here\n\n- One\n- Two"
+    },
+    "party_location": "9,7",
+    "party_trail": [
+      "5,6",
+      "6,6",
+      "5,5",
+      "5,4",
+      "6,4",
+      "7,4",
+      "7,5",
+      "8,6",
+      "9,6"
+    ]
+  }
+},
+{
+  "model": "cards.hexmap",
+  "pk": 3,
+  "fields": {
+    "name": "Map",
+    "game": 2,
+    "hexes": {
+      "3,6": "hills",
+      "3,1": "hills",
+      "5,3": "lake",
+      "6,4": "lake",
+      "5,4": "grass",
+      "7,4": "lake",
+      "6,5": "lake",
+      "1,9": "lake",
+      "1,10": "lake",
+      "4,3": "lake",
+      "4,4": "castle",
+      "4,1": "hills",
+      "4,2": "hills",
+      "0,6": "hills",
+      "1,6": "hills",
+      "2,7": "hills",
+      "4,7": "hills",
+      "5,7": "hills",
+      "4,8": "hills",
+      "4,9": "hills",
+      "2,10": "lake",
+      "2,9": "tower",
+      "4,5": "grass",
+      "5,5": "grass",
+      "6,6": "grass",
+      "9,1": "fortress",
+      "2,11": "vertical_caves",
+      "1,11": "vertical_caves",
+      "0,11": "vertical_caves",
+      "0,10": "vertical_caves",
+      "0,9": "vertical_caves",
+      "0,8": "vertical_caves",
+      "0,7": "vertical_caves",
+      "1,7": "vertical_caves",
+      "1,8": "vertical_caves",
+      "2,8": "fungal_forest",
+      "3,7": "fungal_forest",
+      "3,8": "fungal_forest",
+      "2,6": "vertical_caves",
+      "1,5": "vertical_caves",
+      "1,4": "vertical_caves",
+      "0,5": "vertical_caves",
+      "0,4": "vertical_caves",
+      "0,3": "vertical_caves",
+      "1,3": "vertical_caves",
+      "1,2": "fungal_forest",
+      "1,1": "fungal_forest",
+      "1,0": "fungal_forest",
+      "0,0": "fungal_forest",
+      "0,1": "fungal_forest",
+      "0,2": "fungal_forest",
+      "2,0": "fungal_forest",
+      "2,1": "fungal_forest",
+      "2,2": "fungal_forest",
+      "2,3": "mushroom",
+      "2,4": "vertical_caves",
+      "8,0": "vertical_caves",
+      "9,0": "vertical_caves",
+      "10,1": "mushroom",
+      "11,1": "vertical_caves",
+      "11,0": "vertical_caves",
+      "10,0": "vertical_caves",
+      "8,1": "vertical_caves",
+      "10,2": "mushroom",
+      "11,10": "grass",
+      "11,9": "grass",
+      "10,10": "grass",
+      "9,9": "grass",
+      "10,9": "grass",
+      "11,8": "swamp",
+      "11,7": "swamp",
+      "10,8": "swamp",
+      "9,8": "mushroom",
+      "8,9": "mushroom",
+      "7,8": "mushroom",
+      "8,8": "mushroom",
+      "7,7": "cavern_city",
+      "7,11": "vertical_caves",
+      "6,11": "vertical_caves",
+      "6,10": "vertical_caves",
+      "5,11": "vertical_caves",
+      "3,11": "grass",
+      "4,11": "grass",
+      "3,10": "grass",
+      "4,10": "grass",
+      "5,10": "grass",
+      "5,9": "grass",
+      "5,8": "grass",
+      "6,7": "grass",
+      "7,6": "grass",
+      "8,6": "grass",
+      "7,5": "grass",
+      "7,3": "vertical_caves",
+      "11,2": "vertical_caves",
+      "10,3": "vertical_caves",
+      "9,3": "spikes",
+      "9,2": "spikes",
+      "8,3": "spikes",
+      "8,2": "spikes",
+      "8,7": "spikes",
+      "9,7": "spikes",
+      "10,7": "spikes",
+      "9,6": "spikes",
+      "11,6": "floating_rocks",
+      "10,6": "vertical_caves",
+      "9,5": "vertical_caves",
+      "10,5": "floating_rocks",
+      "11,5": "vertical_caves",
+      "4,0": "hills",
+      "5,0": "floating_rocks",
+      "6,0": "floating_rocks",
+      "7,0": "floating_rocks",
+      "7,1": "vertical_caves",
+      "6,1": "hills",
+      "5,1": "hills",
+      "5,2": "hills",
+      "3,0": "spikes",
+      "3,2": "mushroom",
+      "3,3": "mushroom",
+      "3,9": "hills",
+      "3,5": "hills",
+      "2,5": "hills",
+      "3,4": "mushroom",
+      "4,6": "hills",
+      "6,8": "hills",
+      "6,9": "hills",
+      "7,9": "hills",
+      "7,10": "hills",
+      "8,11": "hills",
+      "5,6": "hills",
+      "8,4": "vertical_caves",
+      "8,5": "vertical_caves",
+      "9,4": "hills",
+      "10,4": "hills",
+      "11,3": "hills",
+      "11,4": "spikes",
+      "6,3": "hills",
+      "7,2": "vertical_caves",
+      "6,2": "hills",
+      "8,10": "cliff",
+      "9,10": "cliff",
+      "10,11": "cliff",
+      "11,11": "cliff",
+      "9,11": "cliff"
+    },
+    "rivers": [
+      [
+        "4,0",
+        "4,1",
+        "3,1",
+        "4,2"
+      ],
+      [
+        "0,6",
+        "1,6",
+        "2,7",
+        "3,6",
+        "4,7",
+        "5,7",
+        "4,8",
+        "4,9",
+        "3,9"
+      ],
+      [
+        "5,7",
+        "6,8",
+        "6,9",
+        "7,9",
+        "7,10",
+        "8,11"
+      ]
+    ],
+    "overlays": {
+      "3,10": "monument",
+      "5,10": "ruins",
+      "9,9": "ruins",
+      "11,6": "sanctum",
+      "2,1": "monument",
+      "5,0": "monument",
+      "5,6": "ruins",
+      "8,7": "sanctum",
+      "7,3": "sanctum",
+      "6,2": "dwellings",
+      "11,4": "dwellings",
+      "0,9": "dwellings",
+      "2,8": "curse",
+      "8,2": "curse",
+      "2,4": "curse",
+      "11,7": "hazard",
+      "7,10": "hazard",
+      "1,2": "myth",
+      "1,7": "myth",
+      "9,10": "myth",
+      "7,0": "myth",
+      "9,5": "myth",
+      "3,11": "myth"
+    },
+    "barriers": {
+      "9,1": [
+        4
+      ],
+      "8,1": [
+        2
+      ],
+      "10,2": [
+        2
+      ],
+      "5,5": [
+        2
+      ],
+      "4,6": [
+        1
+      ],
+      "1,6": [
+        1
+      ],
+      "1,8": [
+        1
+      ],
+      "0,9": [
+        1
+      ],
+      "3,8": [
+        0
+      ],
+      "1,4": [
+        1
+      ],
+      "10,10": [
+        1
+      ],
+      "9,7": [
+        1
+      ],
+      "10,5": [
+        1
+      ],
+      "9,9": [
+        2
+      ],
+      "11,6": [
+        2
+      ],
+      "5,2": [
+        2
+      ],
+      "6,10": [
+        2
+      ],
+      "5,7": [
+        1
+      ],
+      "1,0": [
+        0
+      ],
+      "1,3": [
+        0
+      ],
+      "3,0": [
+        0
+      ],
+      "9,3": [
+        0
+      ],
+      "8,4": [
+        0
+      ]
+    },
+    "notes": {
+      "4,4": "Seat of Power\n\n- Fortiified battlements\n- Primary - Myghal, Boulderkin (3-5), Academic at heart, painful memories of war\n- Secret successor - Foxter, the Storied one (3-1)\n- Sheriff - Caldan, Molekin (4-6) - a humble beast, no roar or flight, beneath the grey a show of might",
+      "4,2": "- Brittle ferns\n- Drowned seat\n- Rapid waters",
+      "6,2": "Citadel of pipers",
+      "5,0": "Offering plinth, 90 degrees from the vertical",
+      "2,1": "Constellation dome",
+      "2,4": "Curse: Salt sludge",
+      "7,3": "- Oracle font\n- **Kerensa, The Spectral Seer 3-11**\n    - Immaterial shadow of a life long extinguished, restricted to dwell near an urn containing their remains.\n    - Sees all events that include death: past, present, and future.\n    - Wants to return to a physical form.",
+      "9,10": "Myth: The Underworld",
+      "1,7": "Myth: The Rock - 6-12",
+      "3,11": "Myth: The Citadel - 5-3",
+      "9,5": "Myth: The Wyvern - 1-5",
+      "1,2": "Myth: The Wheel - 3-8",
+      "7,0": "Myth: The Hole - 5-12",
+      "8,2": "Curse: Haunting reflections",
+      "8,7": "- Sanctum: Cool meadow\n- **Wattle, the Veiled Seer**\n- Hanging folds of flesh and horse-like hair hide any semblance of a face.\n- Sees nothing, but hears all within a Hex.\n- Speaks just once each day, giving a single word of advice to the most worthy visitor.\n- Genuinely wants to uphold peace.",
+      "11,6": "- Sanctum: Sheltered trench, upside down\n- **Pryer, the Buried Seer**\n- Trapped far beneath our feet, but speaks to those who stand at her gravestone, adorned with black flowers.\n- Sees all below the ground, and hears all on the surface. Blind to water and sky.\n- Wants to hurry along the inevitable death of everyone and everything.",
+      "5,6": "- Ruin: Shipwreck\n- Past myth: The Sea",
+      "11,4": "- Dwelling: Village atop spikes",
+      "11,7": "- Hazard: Glue bog",
+      "2,8": "- Curse: Gorge of Sorrow",
+      "0,9": "- Dwelling: Stone orchard village",
+      "3,10": "- Monument: Crystal rose",
+      "5,10": "- Ruin: Smashed jail\n- Past myth: The Lion",
+      "7,10": "- Hazard: Venomous fens",
+      "9,9": "- Ruin: Defiled totem\n- Past Myth: The Sun",
+      "7,7": "- Pristine pillars\n- Cynical, artsy people\n- Tahnet, Overseer, Dovekin\n    - Windged armour can appear as wings, glows red when angry",
+      "9,1": "- Ruan, Overseer, the Horned One\n    - Wild Horn, intertwined, solemn sound",
+      "2,9": "- Davith (he), Owl-kin, long of hair",
+      "4,1": "- Overgrown hills\n- Mucky surge",
+      "3,1": "- Brittle ferns\n- Smooth as silk",
+      "3,2": "- Mushroom fields\n- Dry and puffy",
+      "4,3": "- Crystal waters, vanishing into darkness",
+      "5,2": "- Jagged hills",
+      "5,1": "- Still meadow surrounded by hills"
+    },
+    "party_location": "4,2",
+    "party_trail": []
+  }
+}
+]
