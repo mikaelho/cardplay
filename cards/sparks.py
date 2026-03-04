@@ -112,6 +112,17 @@ SPARKS = {
                 "Cavern", "Jungle", "Dunes", "Tunnels", "Island", "Mountain",
             ],
         },
+        "UNDERGROUND WEIRD": {
+            "columns": ("Nature", "Form"),
+            "col1": [
+                "Phosphorous", "Crystalline", "Fungal", "Petrified", "Venous", "Calcified",
+                "Bioluminescent", "Gelatinous", "Fossilised", "Mercurial", "Chitinous", "Vitreous",
+            ],
+            "col2": [
+                "Chrysalis", "Stalactites", "Mycelium", "Grotto", "Seep", "Spires",
+                "Cocoon", "Basin", "Fissure", "Columns", "Membrane", "Nest",
+            ],
+        },
     },
     "Civilisation": {
         "WOE": {

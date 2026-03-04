@@ -25,6 +25,7 @@ class HexMap(models.Model, AliveMixin):
     overlays = models.JSONField(default=dict, blank=True)  # {"col,row": "overlay_id", ...}
     barriers = models.JSONField(default=dict, blank=True)  # {"col,row": [edge_indices], ...}
     notes = models.JSONField(default=dict, blank=True)  # {"col,row": "markdown text", ...}
+    site_maps = models.JSONField(default=dict, blank=True)  # {"col,row": {"nodes": {...}, "routes": [...], "entrances": [...]}}
     party_location = models.CharField(max_length=20, blank=True)  # "col,row"
     party_trail = models.JSONField(default=list, blank=True)  # ["col,row", ...] recent past locations
 
