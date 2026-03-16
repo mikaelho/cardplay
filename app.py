@@ -269,7 +269,7 @@ def custom_root_template(context: RootTemplateContext) -> str:
       <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
       <script src="{static_url('/django-static/alive/js/dragdrop.js')}"></script>
       <script src="{static_url('/django-static/alive/js/keyboard.js')}"></script>
-      <script src="{static_url('/django-static/alive/js/hexmap.js')}"></script>
+      <script src="{static_url('/django-static/cards/js/hexmap.js')}"></script>
       <script defer type="text/javascript" src="/static/assets/app.js"></script>
       {additional_head_elements}
     </head>
@@ -319,8 +319,14 @@ def create_app():
     app.routes.insert(0, Route("/set-player", set_player))
     app.routes.insert(1, Route("/set-game", set_game))
 
-    # Setup Alive with frame context provider
-    setup_alive(app, url_prefix="/alive", frame_context_provider=get_frame_context)
+    # Register cardplay hooks on all AliveMixin models
+    from cards.alive_hooks import register_hooks
+    register_hooks()
+
+    # Setup Alive with frame context provider and cardplay template overrides
+    cardplay_templates = str(Path(__file__).resolve().parent / "templates")
+    setup_alive(app, url_prefix="/alive", frame_context_provider=get_frame_context,
+                template_dirs=[cardplay_templates])
 
     # Register Sparks & Inspirations page (keeper-only)
     sparks_view = create_sparks_liveview()

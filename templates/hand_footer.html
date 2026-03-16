@@ -1,0 +1,117 @@
+{% if hand_is_player %}
+{% if hand_card_count > 0 or hand_cards %}
+<footer class="fixed bottom-0 right-0 left-0 lg:left-48 z-40 {% if hand_collapsed %}hand-collapsed{% endif %}" id="hand-footer">
+    <button phx-click="toggle_hand_collapsed"
+            class="absolute -top-8 right-4 btn btn-sm btn-ghost bg-base-100 shadow-[0_-2px_4px_rgba(0,0,0,0.1)] rounded-b-none border-b-0 text-xs gap-1">
+        <span class="hand-label-show">Hand</span>
+        <span class="hand-label-hide">Hand</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 hand-chevron" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        </svg>
+    </button>
+    <div class="hand-content bg-base-100 shadow-[0_-2px_4px_rgba(0,0,0,0.1)] p-4">
+        <div>
+            <div class="flex gap-3 overflow-x-auto" id="hand-cards-scroll" phx-hook="ScrollRight">
+                {% for card in hand_cards %}
+                {% if card.is_attribute %}
+                <div class="card card-compact shadow-sm shrink-0 bg-primary/10 border border-primary/30 {% if hand_active_situation_id and not situation_dice %}cursor-pointer hover:shadow-md{% endif %} {% if card.in_situation %}opacity-30{% endif %}"
+                     style="width: 10rem; min-height: 8rem;"
+                     {% if hand_active_situation_id and not situation_dice %}phx-click="toggle_hand_situation" phx-value-card_id="{{card.id}}"{% endif %}>
+                    <div class="card-body p-3">
+                        <h3 class="font-semibold text-sm">{{card.name}}</h3>
+                        {% if card.notes %}
+                        <div class="text-xs text-base-content/70 mt-1">{{card.notes}}</div>
+                        {% endif %}
+                        {% if card.level %}
+                        <div class="flex gap-2 items-center mt-2">
+                            <span class="text-2xl font-bold leading-none">{{card.level}}</span>
+                            {% if card.bands %}
+                            <div class="flex flex-col">
+                                {% for band in card.bands %}
+                                <div class="flex gap-1 text-xs text-base-content/70 leading-snug">
+                                    <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                                    <span>{{band.label}}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% if hand_drawn %}
+                {% for card in hand_cards %}
+                {% if not card.is_attribute %}
+                {% if card.separator_before %}
+                <div class="divider divider-horizontal mx-0"></div>
+                {% endif %}
+                <div class="card card-compact bg-base-200 shadow-sm shrink-0 {% if hand_active_situation_id and not situation_dice %}cursor-pointer hover:shadow-md{% endif %} {% if card.in_situation %}opacity-30{% endif %}"
+                     style="width: 10rem; min-height: 8rem;"
+                     {% if hand_active_situation_id and not situation_dice %}phx-click="toggle_hand_situation" phx-value-card_id="{{card.id}}"{% endif %}>
+                    <div class="card-body p-3">
+                        <h3 class="font-semibold text-sm">{{card.name}}</h3>
+                        {% if card.notes %}
+                        <div class="text-xs text-base-content/70 mt-1">{{card.notes}}</div>
+                        {% endif %}
+                        {% if card.level %}
+                        <div class="flex gap-2 items-center mt-2">
+                            <span class="text-2xl font-bold leading-none">{{card.level}}</span>
+                            {% if card.bands %}
+                            <div class="flex flex-col">
+                                {% for band in card.bands %}
+                                <div class="flex gap-1 text-xs text-base-content/70 leading-snug">
+                                    <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                                    <span>{{band.label}}</span>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+                {% if hand_can_draw %}
+                <div class="card bg-base-200 shadow-sm shrink-0 cursor-pointer hover:border-primary border border-base-300 flex items-center justify-center"
+                     style="width: 5rem; min-height: 7rem;"
+                     phx-click="draw_hand">
+                    <span class="text-2xl font-bold text-base-content/40">+1</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</footer>
+<script>
+window.Hooks = window.Hooks || {};
+window.Hooks.ScrollRight = {
+    mounted() { this.el.scrollLeft = this.el.scrollWidth; },
+    updated() { this.el.scrollLeft = this.el.scrollWidth; }
+};
+</script>
+<style>
+    #hand-footer .hand-label-show { display: none; }
+    #hand-footer .hand-label-hide { display: inline; }
+    #hand-footer .hand-chevron { transition: transform 0.2s; }
+    #hand-footer .hand-content {
+        display: grid;
+        grid-template-rows: 1fr;
+        transition: grid-template-rows 0.2s ease;
+    }
+    #hand-footer .hand-content > div {
+        overflow: hidden;
+    }
+    #hand-footer.hand-collapsed .hand-content {
+        grid-template-rows: 0fr;
+        padding: 0;
+    }
+    #hand-footer.hand-collapsed .hand-label-show { display: inline; }
+    #hand-footer.hand-collapsed .hand-label-hide { display: none; }
+    #hand-footer.hand-collapsed .hand-chevron { transform: rotate(180deg); }
+</style>
+{% endif %}
+{% endif %}

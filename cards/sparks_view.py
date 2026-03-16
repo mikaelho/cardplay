@@ -87,7 +87,7 @@ def create_sparks_liveview():
 
         async def mount(self, socket: LiveViewSocket[SparksContext], session: dict[str, Any]):
             from alive import _frame_context_provider
-            from alive.ui import render_die_svg
+            from cards.ui import render_die_svg
 
             frame_data = {}
             if _frame_context_provider:
@@ -108,7 +108,7 @@ def create_sparks_liveview():
                 socket.context.inspirations = _roll_inspirations()
             elif event == "quick_roll_d6":
                 socket.context.quick_d6 = random.randint(1, 6)
-                from alive.ui import render_die_svg
+                from cards.ui import render_die_svg
                 socket.context.quick_d6_svg = render_die_svg(socket.context.quick_d6, css_class="h-8 w-8")
             elif event == "quick_roll_d12":
                 socket.context.quick_d12 = random.randint(1, 12)

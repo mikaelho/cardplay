@@ -1,0 +1,124 @@
+{% include "frame_top.html" %}
+<style>
+    .die-face { fill: var(--color-base-content); }
+    .die-pip { fill: var(--color-base-100); }
+    .die-primary .die-face { fill: var(--color-primary); }
+    .die-primary .die-pip { fill: var(--color-primary-content); }
+    .die-faded { opacity: 0.3; }
+</style>
+<div class="container mx-auto p-4 max-w-5xl">
+    {% if breadcrumbs %}
+    <div class="text-sm breadcrumbs mb-4">
+        <ul>
+            {% for crumb in breadcrumbs %}
+            <li>
+                {% if crumb.url %}
+                <a href="{{crumb.url}}" class="link">{{crumb.label}}</a>
+                {% else %}
+                <span>{{crumb.label}}</span>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">{{model_name}}</h1>
+        {% if not creating %}
+        <button class="btn btn-primary" phx-click="start_create">+ New Situation</button>
+        {% endif %}
+    </div>
+
+    {% if creating %}
+    <div class="card bg-base-100 shadow-sm border-2 border-primary mb-4">
+        <div class="card-body create-form" id="create-form" phx-hook="AutoFocus">
+            <h2 class="card-title">New {{model_name_singular}}</h2>
+            {% if create_error %}
+            <div class="alert alert-error">{{create_error}}</div>
+            {% endif %}
+            <form phx-change="update_create_field" phx-submit="save_create">
+            {% for field in create_fields %}
+            <fieldset class="fieldset w-full">
+                <legend class="fieldset-legend">{{field.label}}{% if field.required %} *{% endif %}</legend>
+                {% if field.field_type == 'textarea' %}
+                <textarea class="textarea w-full" name="{{field.name}}" phx-value-field="{{field.name}}" rows="3" autocomplete="off">{{field.value}}</textarea>
+                {% elif field.field_type == 'select' %}
+                <select class="select w-full" name="{{field.name}}" phx-value-field="{{field.name}}">
+                    <option value="">-- Select --</option>
+                    {% for choice in field.choices %}
+                    <option value="{{choice.0}}">{{choice.1}}</option>
+                    {% endfor %}
+                </select>
+                {% else %}
+                <input type="text" class="input w-full" name="{{field.name}}" value="{{field.value}}" phx-value-field="{{field.name}}" autocomplete="off" />
+                {% endif %}
+            </fieldset>
+            {% endfor %}
+            <div class="card-actions justify-end mt-4">
+                <button type="button" class="btn btn-ghost" phx-click="cancel_create">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if hand_active_situation_id %}
+    <div class="flex gap-6 flex-col lg:flex-row">
+        <div class="flex-1">
+            <div class="card bg-base-100 shadow-sm">
+                <div class="card-body">
+                    <div class="flex justify-between items-center">
+                        <input type="text" value="{{active_situation_name}}" phx-blur="rename_situation" name="name"
+                               class="text-2xl font-bold bg-transparent border-none outline-none focus:border-b focus:border-primary w-full" />
+                        {% if situation_cards and not situation_dice %}
+                        <button class="btn btn-primary" phx-click="roll_situation">Roll</button>
+                        {% endif %}
+                        {% if situation_dice and situation_all_assigned and not situation_dice_assigned %}
+                        <button class="btn btn-primary" phx-click="lock_dice">Done</button>
+                        {% endif %}
+                        {% if situation_dice_assigned %}
+                        <button class="btn btn-primary" phx-click="resolve_situation">Done</button>
+                        {% endif %}
+                    </div>
+                    {% if active_situation_notes %}
+                    <p class="text-base-content/70">{{active_situation_notes}}</p>
+                    {% endif %}
+
+                    {% if situation_dice and not situation_dice_assigned %}
+                    <div class="flex gap-2 items-center mt-4">
+                        {% for die in situation_dice %}
+                        {% if die.assigned %}
+                        <span class="die-primary die-faded cursor-pointer" phx-click="unassign_die" phx-value-card_id="{{die.card_id}}">{{die.svg}}</span>
+                        {% else %}
+                        <span class="die-primary">{{die.svg}}</span>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% include "situation_cards.html" %}
+                </div>
+            </div>
+        </div>
+
+        {% if past_situations %}
+        <div class="w-full lg:w-56 shrink-0">
+            <h3 class="text-sm text-base-content/50 uppercase font-semibold mb-2">Past Situations</h3>
+            <ul class="menu bg-base-100 rounded-box shadow-sm w-full">
+                {% for sit in past_situations %}
+                <li><span class="text-base-content/70">{{sit.name}}</span></li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="text-center py-12 text-base-content/50">
+        <p class="text-lg">No situations yet.</p>
+        <p class="text-sm mt-2">Create a new situation to get started.</p>
+    </div>
+    {% endif %}
+</div>
+{% include "frame_bottom.html" %}

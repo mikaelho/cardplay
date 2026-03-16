@@ -1,0 +1,37 @@
+    </div>
+    <div class="drawer-side">
+        <label for="app-drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
+        <div class="bg-base-100 min-h-full w-48 p-4 flex flex-col" style="padding-bottom: max(1rem, env(safe-area-inset-bottom))">
+            <ul class="menu flex-1">
+                <li class="menu-title">Contents</li>
+                {% for m in frame.sidebar_models %}
+                <li><a href="{{m.url}}">{{m.title}}</a></li>
+                {% endfor %}
+            </ul>
+            <style>.die-face{fill:var(--color-base-content)}.die-pip{fill:var(--color-base-100)}</style>
+            <div class="flex gap-3 items-center justify-center pt-4 border-t border-base-300">
+                <button class="cursor-pointer" phx-click="quick_roll_d6" title="Roll d6"
+                        onclick="this.animate([{transform:'rotate(0)'},{transform:'rotate(360deg)'}],{duration:500,easing:'ease-out'})">
+                    {{quick_d6_svg}}
+                </button>
+                <button class="cursor-pointer" phx-click="quick_roll_d12" title="Roll d12"
+                        onclick="this.animate([{transform:'rotate(0)'},{transform:'rotate(360deg)'}],{duration:500,easing:'ease-out'})">
+                    <svg viewBox="0 0 40 40" class="h-10 w-10">
+                        <polygon points="20,2 30.6,5.4 37.1,14.4 37.1,25.6 30.6,34.6 20,38 9.4,34.6 2.9,25.6 2.9,14.4 9.4,5.4" class="die-face" opacity="0.9" stroke="var(--color-base-content)" stroke-width="4" stroke-linejoin="round"/>
+                        <g stroke="var(--color-base-content)" stroke-width="1" opacity="0.6">
+                            <line x1="20" y1="7" x2="20" y2="2"/>
+                            <line x1="32.4" y1="16" x2="37.1" y2="14.4"/>
+                            <line x1="27.6" y1="30.5" x2="30.6" y2="34.6"/>
+                            <line x1="12.4" y1="30.5" x2="9.4" y2="34.6"/>
+                            <line x1="7.6" y1="16" x2="2.9" y2="14.4"/>
+                        </g>
+                        <polygon points="20,7 32.4,16 27.6,30.5 12.4,30.5 7.6,16" class="die-face" stroke="var(--color-base-content)" stroke-width="3" stroke-linejoin="round"/>
+                        <text x="20" y="20" text-anchor="middle" dominant-baseline="central" class="die-pip" font-size="16" font-weight="bold">{{quick_d12}}</text>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "search.html" %}
+{% include "hand_footer.html" %}

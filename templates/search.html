@@ -1,0 +1,44 @@
+{% if search_open %}
+<div class="fixed inset-0 z-50" phx-window-keydown="close_search" phx-key="Escape">
+    <div class="fixed inset-0 bg-black/30" phx-click="close_search"></div>
+    <div class="fixed inset-0 flex items-start justify-center pointer-events-none pt-20">
+        <div class="bg-base-100 rounded-lg shadow-lg w-full max-w-md pointer-events-auto">
+            <div class="p-4" phx-hook="AutoFocus" id="search-focus">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-lg font-bold">Search</h2>
+                    <button class="btn btn-ghost btn-xs" phx-click="close_search">✕</button>
+                </div>
+                <input type="text"
+                       class="input input-bordered w-full mb-3"
+                       placeholder="Search notes, situations, cards..."
+                       phx-keyup="search_update"
+                       phx-debounce="200"
+                       value="{{search_query}}"
+                       id="search-input" />
+                {% if search_results %}
+                <div class="max-h-80 overflow-y-auto flex flex-col gap-1">
+                    {% for r in search_results %}
+                    {% if r.group_label %}
+                    <div class="text-xs font-bold uppercase opacity-50 mt-2 first:mt-0">{{r.group_label}}</div>
+                    {% else %}
+                    <button class="text-left w-full px-2 py-1.5 rounded hover:bg-base-200 cursor-pointer"
+                            phx-click="search_select" phx-value-type="{{r.type}}" phx-value-id="{{r.id}}">
+                        <div class="flex items-center gap-2">
+                            <span class="badge badge-xs badge-outline">{{r.badge}}</span>
+                            <span class="font-medium text-sm">{{r.label}}</span>
+                        </div>
+                        {% if r.snippet %}
+                        <div class="text-xs opacity-60 ml-6 truncate">{{r.snippet}}</div>
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% elif search_query and search_query|len >= 2 %}
+                <div class="text-sm opacity-50 text-center py-4">No results</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}

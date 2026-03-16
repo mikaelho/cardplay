@@ -45,7 +45,7 @@ class CharacterCard(models.Model, AliveMixin):
     def get_inline_display_data(cls, item_data: dict) -> dict:
         """Compute extra display data for inline rendering."""
         from .card import get_bands_for_level
-        from alive.ui import render_rating
+        from cards.ui import render_rating
         level = item_data["through_fields"].get("level", 4)
         if isinstance(level, str):
             level = int(level) if level else 4

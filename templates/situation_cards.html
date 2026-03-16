@@ -1,0 +1,299 @@
+{% if situation_cards %}
+{% if situation_resolved %}
+<div class="flex flex-col gap-1 mt-4">
+    {% for card in situation_cards %}
+    <div class="text-sm">
+        <span class="font-semibold">{{card.name}}</span>{% if card.notes %} &mdash; <span class="text-base-content/70">{{card.notes}}</span>{% endif %}{% if card.assigned_band %} &mdash; <span class="text-primary font-semibold">{{card.assigned_band}}</span>{% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="flex flex-wrap gap-3 mt-4">
+    {% for card in situation_cards %}
+    {% if situation_dice_assigned %}
+        {% if is_keeper %}
+    <div class="card card-compact bg-base-200 shadow-sm flex flex-col {% if card.used %}opacity-30{% endif %}"
+         style="width: 12rem; min-height: 8rem;">
+        <div class="card-body p-3 flex flex-col flex-1">
+            {% if card.editing_name %}
+            <div phx-hook="AutoFocus">
+                <input type="text" class="input input-xs font-semibold text-sm w-full" value="{{card.name}}"
+                       name="value" phx-blur="save_situation_card_edit"
+                       phx-value-card_id="{{card.id}}" phx-value-field="name" autocomplete="off" />
+            </div>
+            {% else %}
+            <h3 class="font-semibold text-sm cursor-pointer hover:underline"
+                phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="name">{{card.name}}</h3>
+            {% endif %}
+            {% if card.character_name %}
+            <div class="text-xs text-base-content/50">{{card.character_name}}</div>
+            {% endif %}
+            {% if card.editing_notes %}
+            <div phx-hook="AutoFocus" class="mt-1">
+                <textarea class="textarea textarea-xs w-full text-xs" rows="2" name="value"
+                          phx-blur="save_situation_card_edit"
+                          phx-value-card_id="{{card.id}}" phx-value-field="notes">{{card.notes}}</textarea>
+            </div>
+            {% else %}
+            <div class="text-xs text-base-content/70 mt-1 cursor-pointer hover:underline"
+                 phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="notes">
+                {% if card.notes %}{{card.notes}}{% else %}<span class="opacity-40 italic">notes</span>{% endif %}
+            </div>
+            {% endif %}
+            <div class="flex gap-2 items-center mt-auto">
+                <span class="die-primary">{{card.assigned_die_svg}}</span>
+                <div class="flex flex-col items-center">
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
+                            phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1">&#9650;</button>
+                    <span class="text-lg font-bold leading-none my-0.5">{{card.level}}</span>
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
+                            phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1">&#9660;</button>
+                </div>
+                {% if card.bands %}
+                <div class="flex flex-col">
+                    {% for band in card.bands %}
+                    <div class="flex gap-1 text-xs leading-snug {% if band.highlighted %}text-primary font-bold{% else %}text-base-content/40{% endif %}">
+                        <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                        <span>{{band.label}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            <button class="btn btn-xs mt-2 {% if card.used %}btn-ghost{% else %}btn-outline{% endif %}"
+                    phx-click="toggle_used_card" phx-value-card_id="{{card.id}}">
+                {% if card.used %}Mark unused{% else %}Mark used{% endif %}
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="card card-compact bg-base-200 shadow-sm flex flex-col cursor-pointer hover:shadow-md {% if card.used %}opacity-30{% endif %}"
+         style="width: 12rem; min-height: 8rem;"
+         phx-click="toggle_used_card" phx-value-card_id="{{card.id}}">
+        <div class="card-body p-3 flex flex-col flex-1">
+            <h3 class="font-semibold text-sm">{{card.name}}</h3>
+            {% if card.character_name %}
+            <div class="text-xs text-base-content/50">{{card.character_name}}</div>
+            {% endif %}
+            <div class="flex gap-2 items-center mt-auto">
+                <span class="die-primary">{{card.assigned_die_svg}}</span>
+                {% if card.bands %}
+                <div class="flex flex-col">
+                    {% for band in card.bands %}
+                    <div class="flex gap-1 text-xs leading-snug {% if band.highlighted %}text-primary font-bold{% else %}text-base-content/40{% endif %}">
+                        <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                        <span>{{band.label}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% elif situation_dice %}
+        <div class="card card-compact bg-base-200 shadow-sm flex flex-col" style="width: 12rem; min-height: 8rem;">
+        <div class="card-body p-3 flex flex-col flex-1">
+            {% if is_keeper and card.editing_name %}
+            <div phx-hook="AutoFocus">
+                <input type="text" class="input input-xs font-semibold text-sm w-full" value="{{card.name}}"
+                       name="value" phx-blur="save_situation_card_edit"
+                       phx-value-card_id="{{card.id}}" phx-value-field="name" autocomplete="off" />
+            </div>
+            {% elif is_keeper %}
+            <h3 class="font-semibold text-sm cursor-pointer hover:underline"
+                phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="name">{{card.name}}</h3>
+            {% else %}
+            <h3 class="font-semibold text-sm">{{card.name}}</h3>
+            {% endif %}
+            {% if card.character_name %}
+            <div class="text-xs text-base-content/50">{{card.character_name}}</div>
+            {% endif %}
+            {% if is_keeper and card.editing_notes %}
+            <div phx-hook="AutoFocus" class="mt-1">
+                <textarea class="textarea textarea-xs w-full text-xs" rows="2" name="value"
+                          phx-blur="save_situation_card_edit"
+                          phx-value-card_id="{{card.id}}" phx-value-field="notes">{{card.notes}}</textarea>
+            </div>
+            {% elif is_keeper %}
+            <div class="text-xs text-base-content/70 mt-1 cursor-pointer hover:underline"
+                 phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="notes">
+                {% if card.notes %}{{card.notes}}{% else %}<span class="opacity-40 italic">notes</span>{% endif %}
+            </div>
+            {% else %}
+            {% if card.notes %}
+            <div class="text-xs text-base-content/70 mt-1">{{card.notes}}</div>
+            {% endif %}
+            {% endif %}
+            <div class="flex gap-2 items-center mt-auto">
+                {% if card.assigned_die_value %}
+                <details class="dropdown">
+                    <summary class="list-none cursor-pointer die-primary">{{card.assigned_die_svg}}</summary>
+                    <div class="dropdown-content bg-base-200 rounded-box z-50 p-2 shadow-lg mt-1">
+                        <div class="flex gap-1">
+                            <button class="cursor-pointer hover:scale-110 transition-transform"
+                                    onclick="this.closest('details').removeAttribute('open')"
+                                    phx-click="unassign_die" phx-value-card_id="{{card.id}}">
+                                {{card.placeholder_svg}}
+                            </button>
+                            {% for die in card.available_dice %}
+                            <button class="die-primary cursor-pointer hover:scale-110 transition-transform"
+                                    onclick="this.closest('details').removeAttribute('open')"
+                                    phx-click="assign_die" phx-value-card_id="{{card.id}}" phx-value-die_index="{{die.index}}">
+                                {{die.svg}}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+                {% else %}
+                <details class="dropdown">
+                    <summary class="list-none cursor-pointer">{{card.placeholder_svg}}</summary>
+                    <div class="dropdown-content bg-base-200 rounded-box z-50 p-2 shadow-lg mt-1">
+                        <div class="flex gap-1">
+                            {% for die in card.available_dice %}
+                            <button class="die-primary cursor-pointer hover:scale-110 transition-transform"
+                                    onclick="this.closest('details').removeAttribute('open')"
+                                    phx-click="assign_die" phx-value-card_id="{{card.id}}" phx-value-die_index="{{die.index}}">
+                                {{die.svg}}
+                            </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </details>
+                {% endif %}
+                {% if is_keeper %}
+                <div class="flex flex-col items-center">
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
+                            phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1">&#9650;</button>
+                    <span class="text-lg font-bold leading-none my-0.5">{{card.level}}</span>
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
+                            phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1">&#9660;</button>
+                </div>
+                {% endif %}
+                {% if card.bands %}
+                <div class="flex flex-col">
+                    {% for band in card.bands %}
+                    <div class="flex gap-1 text-xs leading-snug {% if band.highlighted %}text-primary font-bold{% else %}text-base-content/40{% endif %}">
+                        <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                        <span>{{band.label}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <div class="card card-compact bg-base-200 shadow-sm {% if not is_keeper %}cursor-pointer hover:shadow-md{% endif %}"
+         style="width: 10rem; min-height: 8rem;"
+         {% if not is_keeper %}phx-click="remove_situation_card" phx-value-card_id="{{card.id}}" phx-value-situation_id="{{hand_active_situation_id}}"{% endif %}>
+        <div class="card-body p-3">
+            <div class="flex justify-between items-start">
+                <div class="flex-1 min-w-0">
+                    {% if is_keeper and card.editing_name %}
+                    <div phx-hook="AutoFocus">
+                        <input type="text" class="input input-xs font-semibold text-sm w-full" value="{{card.name}}"
+                               name="value" phx-blur="save_situation_card_edit"
+                               phx-value-card_id="{{card.id}}" phx-value-field="name" autocomplete="off" />
+                    </div>
+                    {% elif is_keeper %}
+                    <h3 class="font-semibold text-sm cursor-pointer hover:underline"
+                        phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="name">{{card.name}}</h3>
+                    {% else %}
+                    <h3 class="font-semibold text-sm">{{card.name}}</h3>
+                    {% endif %}
+                    {% if card.character_name %}
+                    <div class="text-xs text-base-content/50">{{card.character_name}}</div>
+                    {% endif %}
+                </div>
+                {% if is_keeper %}
+                <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto" phx-click="remove_situation_card" phx-value-card_id="{{card.id}}" phx-value-situation_id="{{hand_active_situation_id}}">&times;</button>
+                {% endif %}
+            </div>
+            {% if is_keeper and card.editing_notes %}
+            <div phx-hook="AutoFocus" class="mt-1">
+                <textarea class="textarea textarea-xs w-full text-xs" rows="2" name="value"
+                          phx-blur="save_situation_card_edit"
+                          phx-value-card_id="{{card.id}}" phx-value-field="notes">{{card.notes}}</textarea>
+            </div>
+            {% elif is_keeper %}
+            <div class="text-xs text-base-content/70 mt-1 cursor-pointer hover:underline"
+                 phx-click="start_situation_card_edit" phx-value-card_id="{{card.id}}" phx-value-field="notes">
+                {% if card.notes %}{{card.notes}}{% else %}<span class="opacity-40 italic">notes</span>{% endif %}
+            </div>
+            {% else %}
+            {% if card.notes %}
+            <div class="text-xs text-base-content/70 mt-1">{{card.notes}}</div>
+            {% endif %}
+            {% endif %}
+            {% if card.level %}
+            <div class="flex gap-2 items-center mt-2">
+                {% if is_keeper %}
+                <div class="flex flex-col items-center">
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70" phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1">&#9650;</button>
+                    <span class="text-2xl font-bold leading-none my-0.5">{{card.level}}</span>
+                    <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70" phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1">&#9660;</button>
+                </div>
+                {% else %}
+                <span class="text-2xl font-bold leading-none">{{card.level}}</span>
+                {% endif %}
+                {% if card.bands %}
+                <div class="flex flex-col">
+                    {% for band in card.bands %}
+                    <div class="flex gap-1 text-xs text-base-content/70 leading-snug">
+                        <span class="font-mono shrink-0 text-center" style="width: 3ch">{{band.dice_range}}</span>
+                        <span>{{band.label}}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+{% else %}
+{% if is_keeper %}
+<p class="text-base-content/50 mt-4">No cards in this situation yet.</p>
+{% else %}
+<p class="text-base-content/50 mt-4">No cards in this situation yet. Tap cards in your hand to add them.</p>
+{% endif %}
+{% endif %}
+
+{% if is_keeper and not situation_dice %}
+{% if keeper_adding %}
+<div class="mt-4">
+    {% if creating %}
+    {% include "create_form.html" %}
+    {% else %}
+    <div class="flex flex-wrap gap-2">
+        {% for card in keeper_available_cards %}
+        <button class="btn btn-sm btn-outline" phx-click="keeper_add_card" phx-value-card_id="{{card.id}}">
+            {{card.name}} ({{card.level}})
+        </button>
+        {% endfor %}
+        <button class="btn btn-sm btn-primary" phx-click="keeper_start_create">+ New</button>
+        <button class="btn btn-sm btn-ghost" phx-click="keeper_cancel_add">Cancel</button>
+    </div>
+    {% for group in keeper_player_card_groups %}
+    <div class="mt-3">
+        <h4 class="text-xs text-base-content/50 uppercase font-semibold mb-1">{{group.character_name}}</h4>
+        <div class="flex flex-wrap gap-2">
+            {% for card in group.cards %}
+            <button class="btn btn-sm btn-outline" phx-click="keeper_add_card" phx-value-card_id="{{card.id}}">
+                {{card.name}} ({{card.level}})
+            </button>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+{% else %}
+<button class="btn btn-sm btn-outline mt-4" phx-click="keeper_start_add">+ Add card</button>
+{% endif %}
+{% endif %}
