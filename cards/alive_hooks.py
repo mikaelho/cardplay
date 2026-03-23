@@ -342,10 +342,10 @@ async def load_map_data(socket):
         if not hex_map and game_id:
             hex_map = HexMap.objects.create(name="Map", game_id=game_id)
         if hex_map:
-            return hex_map.pk, hex_map.hexes or {}, hex_map.rivers or [], hex_map.overlays or {}, hex_map.barriers or {}, hex_map.party_location or "", hex_map.party_trail or [], hex_map.notes or {}, hex_map.site_maps or {}
-        return None, {}, [], {}, {}, "", [], {}, {}
+            return hex_map.pk, hex_map.hexes or {}, hex_map.rivers or [], hex_map.overlays or {}, hex_map.barriers or {}, hex_map.party_location or "", hex_map.party_trail or [], hex_map.notes or {}, hex_map.site_maps or {}, hex_map.revealed_overlays or {}
+        return None, {}, [], {}, {}, "", [], {}, {}, {}
 
-    map_id, hexes, rivers, overlays, barriers, party_loc, party_trail, notes, site_maps = await _fetch_map()
+    map_id, hexes, rivers, overlays, barriers, party_loc, party_trail, notes, site_maps, revealed_overlays = await _fetch_map()
 
     # Fetch timeline data (situations/notes for this game)
     timeline_entries = []
@@ -426,6 +426,7 @@ async def load_map_data(socket):
         timeline_locations=timeline_locs if game_id else None,
         notes=notes,
         site_maps=site_maps,
+        revealed_overlays=revealed_overlays,
     )
     if edit_mode:
         socket.context.hex_map_palette = render_hex_palette(
@@ -1257,6 +1258,18 @@ async def cardplay_event_handler(event, payload, socket):
             socket.context.hex_action_is_adjacent = True
             socket.context.hex_selected_hex = ""
             socket.context.hex_note_editing = False
+            # Check overlay state for reveal/hide buttons
+            map_id = socket.context.hex_map_id
+            if map_id:
+                @sync_to_async(thread_sensitive=False)
+                def _check_overlay():
+                    hex_map = HexMap.objects.get(pk=map_id)
+                    has_ovl = target_key in (hex_map.overlays or {})
+                    is_revealed = target_key in (hex_map.revealed_overlays or {})
+                    return has_ovl, is_revealed
+                has_ovl, is_revealed = await _check_overlay()
+                socket.context.hex_action_has_overlay = has_ovl
+                socket.context.hex_action_overlay_revealed = is_revealed
             await load_map_data(socket)
         else:
             # Open note directly
@@ -1268,13 +1281,17 @@ async def cardplay_event_handler(event, payload, socket):
                 def _load_note():
                     hex_map = HexMap.objects.get(pk=map_id)
                     notes = hex_map.notes or {}
-                    return notes.get(target_key, "")
+                    has_ovl = target_key in (hex_map.overlays or {})
+                    is_revealed = target_key in (hex_map.revealed_overlays or {})
+                    return notes.get(target_key, ""), has_ovl, is_revealed
 
-                note = await _load_note()
+                note, has_ovl, is_revealed = await _load_note()
                 socket.context.hex_selected_hex = target_key
                 socket.context.hex_selected_note = note
                 socket.context.hex_note_html = render_markdown_safe(note) if note.strip() else ""
                 socket.context.hex_note_editing = False
+                socket.context.hex_action_has_overlay = has_ovl
+                socket.context.hex_action_overlay_revealed = is_revealed
                 await load_map_data(socket)
         return True
 
@@ -1313,6 +1330,57 @@ async def cardplay_event_handler(event, payload, socket):
             socket.context.hex_note_html = render_markdown_safe(note) if note.strip() else ""
             socket.context.hex_note_editing = False
             await load_map_data(socket)
+        return True
+
+    if event == "reveal_overlay":
+        if not socket.context.is_keeper:
+            return True
+        target_key = socket.context.hex_action_hex or socket.context.hex_selected_hex
+        map_id = socket.context.hex_map_id
+        if not target_key or not map_id:
+            return True
+
+        @sync_to_async(thread_sensitive=False)
+        def _reveal():
+            hex_map = HexMap.objects.get(pk=map_id)
+            ovl = (hex_map.overlays or {}).get(target_key)
+            if ovl:
+                revealed = hex_map.revealed_overlays or {}
+                revealed[target_key] = ovl
+                hex_map.revealed_overlays = revealed
+                hex_map.save(update_fields=["revealed_overlays"])
+
+        await _reveal()
+        socket.context.hex_action_hex = ""
+        socket.context.hex_action_is_adjacent = False
+        socket.context.hex_selected_hex = ""
+        await load_map_data(socket)
+        await _broadcast(socket, HexMap)
+        return True
+
+    if event == "hide_overlay":
+        if not socket.context.is_keeper:
+            return True
+        target_key = socket.context.hex_action_hex or socket.context.hex_selected_hex
+        map_id = socket.context.hex_map_id
+        if not target_key or not map_id:
+            return True
+
+        @sync_to_async(thread_sensitive=False)
+        def _hide():
+            hex_map = HexMap.objects.get(pk=map_id)
+            revealed = hex_map.revealed_overlays or {}
+            if target_key in revealed:
+                del revealed[target_key]
+                hex_map.revealed_overlays = revealed
+                hex_map.save(update_fields=["revealed_overlays"])
+
+        await _hide()
+        socket.context.hex_action_hex = ""
+        socket.context.hex_action_is_adjacent = False
+        socket.context.hex_selected_hex = ""
+        await load_map_data(socket)
+        await _broadcast(socket, HexMap)
         return True
 
     if event == "close_hex_action":

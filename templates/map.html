@@ -182,6 +182,12 @@
                             <button class="btn btn-sm btn-primary w-full" phx-click="hex_action_move">Move here</button>
                             <button class="btn btn-sm btn-ghost w-full" phx-click="hex_action_note">View note</button>
                             {% if is_keeper %}
+                            {% if hex_action_has_overlay and not hex_action_overlay_revealed %}
+                            <button class="btn btn-sm btn-ghost w-full" phx-click="reveal_overlay">Reveal Symbol</button>
+                            {% endif %}
+                            {% if hex_action_overlay_revealed %}
+                            <button class="btn btn-sm btn-ghost w-full" phx-click="hide_overlay">Hide Symbol</button>
+                            {% endif %}
                             <button class="btn btn-sm btn-ghost w-full" phx-click="open_site_map">Site Map</button>
                             {% endif %}
                         </div>
@@ -218,7 +224,13 @@
                             {% endif %}
                         {% endif %}
                         {% if is_keeper %}
-                        <div class="mt-2 pt-2 border-t border-base-300">
+                        <div class="mt-2 pt-2 border-t border-base-300 flex flex-col gap-1">
+                            {% if hex_action_has_overlay and not hex_action_overlay_revealed %}
+                            <button class="btn btn-xs btn-ghost w-full" phx-click="reveal_overlay">Reveal Symbol</button>
+                            {% endif %}
+                            {% if hex_action_overlay_revealed %}
+                            <button class="btn btn-xs btn-ghost w-full" phx-click="hide_overlay">Hide Symbol</button>
+                            {% endif %}
                             <button class="btn btn-xs btn-ghost w-full" phx-click="open_site_map">
                                 <svg viewBox="0 0 24 24" class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2">
                                     <polygon points="12,2 22,8.5 22,15.5 12,22 2,15.5 2,8.5"/>

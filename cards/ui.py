@@ -549,6 +549,7 @@ def render_hex_map(
     timeline_locations: list[tuple[str, str]] | None = None,
     notes: dict | None = None,
     site_maps: dict | None = None,
+    revealed_overlays: dict | None = None,
 ) -> Markup:
     """Render a hex map as inline SVG with flat-top hexes.
 
@@ -563,6 +564,7 @@ def render_hex_map(
     party_trail: list of recent past "col,row" positions (oldest first).
     adjacent_hexes: set of "col,row" strings for movement targets.
     timeline_locations: list of (entry_id, location) for hover highlights.
+    revealed_overlays: dict of overlays visible to all players (always rendered).
     """
     if hexes is None:
         hexes = {}
@@ -572,6 +574,8 @@ def render_hex_map(
         overlays = {}
     if barriers is None:
         barriers = {}
+    if revealed_overlays is None:
+        revealed_overlays = {}
 
     hex_h = _SQRT3 * hex_size
     margin = hex_size * 0.5
@@ -615,7 +619,7 @@ def render_hex_map(
     # Add symbol definitions
     for sym_svg in _HEX_SYMBOLS.values():
         parts.append(sym_svg)
-    if show_overlays:
+    if show_overlays or revealed_overlays:
         for sym_svg in _HEX_OVERLAY_SYMBOLS.values():
             parts.append(sym_svg)
     parts.append('</defs>')
@@ -697,6 +701,23 @@ def render_hex_map(
                 )
             except (ValueError, AttributeError):
                 continue
+
+    # Draw revealed overlays (visible to all players, always rendered)
+    if revealed_overlays:
+        ovl_size = hex_size * 1.4
+        for col in range(cols):
+            for row in range(rows):
+                key = f"{col},{row}"
+                ovl_id = revealed_overlays.get(key)
+                if ovl_id and ovl_id in _HEX_OVERLAY_SYMBOLS:
+                    cx = margin + hex_size + col * 1.5 * hex_size
+                    cy = margin + hex_h / 2 + row * hex_h + (col % 2) * hex_h / 2
+                    parts.append(
+                        f'<use href="#ovl-{ovl_id}" '
+                        f'x="{cx - ovl_size / 2:.1f}" y="{cy - ovl_size / 2:.1f}" '
+                        f'width="{ovl_size:.1f}" height="{ovl_size:.1f}" '
+                        f'style="pointer-events:none"/>'
+                    )
 
     # Draw overlay symbols and barriers (keeper-only layer, on top of everything)
     if show_overlays:

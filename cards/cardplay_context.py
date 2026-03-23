@@ -54,6 +54,8 @@ class CardplayContext(ModelContext):
     hex_selected_hex: str = ""
     hex_action_hex: str = ""
     hex_action_is_adjacent: bool = False
+    hex_action_has_overlay: bool = False
+    hex_action_overlay_revealed: bool = False
     hex_selected_note: str = ""
     hex_note_html: str = ""
     hex_note_editing: bool = False
