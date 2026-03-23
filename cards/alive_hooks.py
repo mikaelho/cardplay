@@ -2078,12 +2078,7 @@ async def cardplay_event_handler(event, payload, socket):
                 n = len(originals)
                 if n == 0:
                     return
-                # Check for a spare die carried over from the previous situation
-                game = Game.objects.get(pk=sit.game_id)
                 dice = [random.randint(1, 6) for _ in range(n + 1)]
-                if game.spare_die is not None:
-                    dice = [game.spare_die] + dice
-                    Game.objects.filter(pk=game.pk).update(spare_die=None)
                 sit.dice = dice
                 sit.save(update_fields=["dice"])
                 # Create archived snapshot cards on the situation
@@ -2179,10 +2174,6 @@ async def cardplay_event_handler(event, payload, socket):
                     return
                 sit.dice_assigned = True
                 sit.save(update_fields=["dice_assigned"])
-                # Store the unassigned leftover die as spare for next situation
-                assigned_indices = set(sit.assignments.values())
-                spare_idx = next(i for i in range(len(sit.dice)) if i not in assigned_indices)
-                Game.objects.filter(pk=sit.game_id).update(spare_die=sit.dice[spare_idx])
 
             await _lock()
             await _refresh(socket)
