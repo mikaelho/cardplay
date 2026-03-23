@@ -745,15 +745,15 @@ async def load_hand_data(socket):
         sit_dice = active_sit.dice if active_sit else []
 
         # Determine if player can draw more cards
-        # Locked when any card from this character is in the active situation
-        hand_locked = False
-        if active_sit:
-            hand_locked = active_sit.cards.filter(
-                character_id=character_id
-            ).exists()
+        # No drawing during an active situation or when draw_active is False
         drawn_non_attr = sum(1 for c in hand_cards if not c["is_attribute"])
+        has_active_situation = game_id and Situation.objects.filter(
+            game_id=game_id, situation_type="situation", resolved=False
+        ).exists()
+        draw_active = not hand or hand.draw_active
         hand_can_draw = (
-            not hand_locked
+            not has_active_situation
+            and draw_active
             and drawn_non_attr < non_attr_count
         )
 
@@ -1561,16 +1561,23 @@ async def cardplay_event_handler(event, payload, socket):
             def _create_entry():
                 Situation = apps.get_model('cards', 'Situation')
                 Game = apps.get_model('cards', 'Game')
+                Hand = apps.get_model('cards', 'Hand')
                 loc = ""
                 hm = HexMap.objects.filter(game_id=game_id).first()
                 if hm and hm.party_location:
                     loc = hm.party_location
                 game = Game.objects.get(pk=game_id)
-                return Situation.objects.create(
+                entry = Situation.objects.create(
                     name=name, notes=notes, game_id=game_id,
                     situation_type=sit_type, location=loc,
                     game_time=game.game_time or {},
                 )
+                # Lock drawing for all players when a situation starts
+                if sit_type == "situation":
+                    Hand.objects.filter(
+                        character__game_id=game_id
+                    ).update(draw_active=False)
+                return entry
             await _create_entry()
         socket.context.map_create_open = False
         socket.context.map_create_type = ""
@@ -2094,6 +2101,16 @@ async def cardplay_event_handler(event, payload, socket):
                 for cc in originals:
                     for hand in Hand.objects.filter(cards__pk=cc.pk):
                         hand.cards.remove(cc.pk)
+                # Re-enable drawing for hands with no non-attribute cards left
+                affected_character_ids = set(cc.character_id for cc in originals)
+                for char_id in affected_character_ids:
+                    for hand in Hand.objects.filter(character_id=char_id):
+                        has_non_attr = hand.cards.exclude(
+                            tag__name="Attribute"
+                        ).exists()
+                        if not has_non_attr:
+                            hand.draw_active = True
+                            hand.save(update_fields=["draw_active"])
 
             await _roll()
             await _refresh(socket)

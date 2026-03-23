@@ -62,8 +62,9 @@ class SituationAdmin(admin.ModelAdmin):
 
 @admin.register(Hand)
 class HandAdmin(admin.ModelAdmin):
-    list_display = ['name', 'character']
+    list_display = ['name', 'character', 'draw_active']
     list_filter = ['character']
+    list_editable = ['draw_active']
 
 
 @admin.register(KeeperNote)

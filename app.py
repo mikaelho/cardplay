@@ -238,9 +238,9 @@ def custom_root_template(context: RootTemplateContext) -> str:
       <meta charset="utf-8">
       <meta http-equiv="X-UA-Compatible" content="IE=edge">
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-      <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-      <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
-      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+      <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19" rel="stylesheet" type="text/css" />
+      <link href="https://cdn.jsdelivr.net/npm/daisyui@5.5.19/themes.css" rel="stylesheet" type="text/css" />
+      <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.2.2"></script>
       <link rel="stylesheet" href="{static_url('/django-static/alive/css/alive.css')}">
       <style>
         /* Responsive drawer: DaisyUI drawer-open via media query

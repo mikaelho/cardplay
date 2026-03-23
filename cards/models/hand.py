@@ -23,6 +23,7 @@ class Hand(models.Model, AliveMixin):
         blank=True,
         related_name="hands",
     )
+    draw_active = models.BooleanField(default=True)
 
     def __str__(self):
         return self.name

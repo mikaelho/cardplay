@@ -88,11 +88,13 @@ window.Hooks.HexMap = {
             }
         }
 
-        var dots = document.querySelectorAll('[data-highlight-entry]');
-        dots.forEach(function(dot) {
-            var entryId = dot.getAttribute('data-highlight-entry');
-
-            var onEnter = function() {
+        var timeline = document.querySelector('.timeline');
+        if (timeline) {
+            var onMove = function(e) {
+                var li = e.target.closest('[data-highlight-entry]');
+                if (!li) return;
+                var entryId = li.getAttribute('data-highlight-entry');
+                if (activeGroup && activeGroup.getAttribute('data-entry-id') === entryId) return;
                 clearActive();
                 var group = svg.querySelector('[data-entry-id="' + entryId + '"]');
                 if (group) {
@@ -107,13 +109,13 @@ window.Hooks.HexMap = {
                 clearActive();
             };
 
-            dot.addEventListener('mouseenter', onEnter);
-            dot.addEventListener('mouseleave', onLeave);
+            timeline.addEventListener('mouseover', onMove);
+            timeline.addEventListener('mouseleave', onLeave);
             cleanups.push(function() {
-                dot.removeEventListener('mouseenter', onEnter);
-                dot.removeEventListener('mouseleave', onLeave);
+                timeline.removeEventListener('mouseover', onMove);
+                timeline.removeEventListener('mouseleave', onLeave);
             });
-        });
+        }
 
         this._hoverCleanup = function() {
             clearActive();
