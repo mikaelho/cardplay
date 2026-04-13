@@ -19,3 +19,4 @@ staticfiles/
 
 # uv
 .uv/
+/secret_key.py

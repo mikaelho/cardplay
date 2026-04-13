@@ -2,9 +2,9 @@
 
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent
+from secret_key import SECRET_KEY
 
-SECRET_KEY = 'dev-secret-key-change-in-production'
+BASE_DIR = Path(__file__).resolve().parent
 
 DEBUG = True
 
