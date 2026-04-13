@@ -421,7 +421,7 @@ async def load_map_data(socket):
         barriers=barriers, edit_mode=edit_mode,
         is_keeper=socket.context.is_keeper,
         show_overlays=show_overlays,
-        party_location=party_loc, party_trail=party_trail[-3:],
+        party_location=party_loc, party_trail=party_trail,
         adjacent_hexes=adjacent,
         timeline_locations=timeline_locs if game_id else None,
         notes=notes,
