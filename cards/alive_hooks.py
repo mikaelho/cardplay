@@ -2146,7 +2146,7 @@ async def cardplay_event_handler(event, payload, socket):
                 n = len(originals)
                 if n == 0:
                     return
-                dice = [random.randint(1, 6) for _ in range(n + 1)]
+                dice = [random.randint(1, 6) for _ in range(n)]
                 sit.dice = dice
                 sit.save(update_fields=["dice"])
                 # Create archived snapshot cards on the situation
