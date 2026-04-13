@@ -606,6 +606,7 @@ def render_hex_map(
         '  .timeline-highlight { opacity: 0; pointer-events: none; }',
         '  .timeline-highlight.active { opacity: 1; }',
         '  .hex-move { cursor: pointer; }',
+        '  .hex-visited { fill: var(--color-secondary); opacity: 0.07; }',
         '  .hex-move:hover .hex-fill { fill: var(--color-secondary); opacity: 0.15; }',
     ]
     if edit_mode:
@@ -623,6 +624,11 @@ def render_hex_map(
         for sym_svg in _HEX_OVERLAY_SYMBOLS.values():
             parts.append(sym_svg)
     parts.append('</defs>')
+
+    # Build set of visited hexes from party trail
+    visited_hexes = set(party_trail) if party_trail else set()
+    if party_location:
+        visited_hexes.add(party_location)
 
     # Draw hexes
     sym_size = hex_size * 1.6
@@ -655,6 +661,8 @@ def render_hex_map(
                 )
 
             parts.append(f'<polygon points="{points}" class="hex-fill"/>')
+            if key in visited_hexes:
+                parts.append(f'<polygon points="{points}" class="hex-visited"/>')
             parts.append(f'<polygon points="{points}" class="hex-stroke"/>')
 
             if symbol_id and symbol_id != "river" and symbol_id in _HEX_SYMBOLS:
