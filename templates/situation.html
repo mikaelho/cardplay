@@ -97,7 +97,7 @@
                         {% for die in situation_dice %}
                         {% if die.assigned %}
                         <span class="die-primary die-faded die-drag cursor-pointer" data-die-index="{{die.index}}"
-                              phx-click="unassign_die" phx-value-card_id="{{die.card_id}}">{{die.svg}}</span>
+                              phx-click="unassign_die" phx-value-card_id="{{die.card_id}}" phx-value-die_index="{{die.index}}">{{die.svg}}</span>
                         {% else %}
                         <span class="die-primary die-drag cursor-pointer {% if die.selected %}die-selected{% endif %}"
                               data-die-index="{{die.index}}" phx-click="select_die" phx-value-die_index="{{die.index}}">{{die.svg}}</span>

@@ -2,12 +2,22 @@
 
 import json
 import random
+import threading
 from asgiref.sync import sync_to_async
 from django.apps import apps
+from django.db import transaction
 
 from alive.store import get_store, acquire_lock, release_lock, get_lock_holder
 from alive.components.editable_field import render_markdown_safe
 from cards.ui import snippet as _snippet
+
+
+# Rolling and assigning dice are read-modify-write cycles on a situation's
+# JSON columns, and the whole table is working on them at once. SQLite gives
+# no row lock to lean on -- select_for_update() is a no-op there, and two
+# overlapping transactions just raise "database is locked" and drop a write --
+# so serialise them in-process instead.
+_DICE_LOCK = threading.Lock()
 
 
 # --- Helper ---
@@ -2187,43 +2197,46 @@ async def cardplay_event_handler(event, payload, socket):
                 Hand = apps.get_model('cards', 'Hand')
                 SituationCard = apps.get_model('cards', 'SituationCard')
                 Game = apps.get_model('cards', 'Game')
-                sit = Situation.objects.get(pk=situation_id)
-                if sit.dice:
-                    return  # Already rolled
-                originals = list(
-                    sit.cards.select_related('card', 'character').all()
-                )
-                n = len(originals)
-                if n == 0:
-                    return
-                dice = [random.randint(1, 6) for _ in range(n)]
-                sit.dice = dice
-                sit.save(update_fields=["dice"])
-                # Create archived snapshot cards on the situation
-                for cc in originals:
-                    SituationCard.objects.create(
-                        situation=sit,
-                        name=cc.card.name,
-                        notes=cc.card.notes or "",
-                        level=cc.level,
-                        character_name=cc.character.name if cc.character else "",
+                # Two players can hit Roll at the same moment; the whole
+                # snapshot has to happen once, so hold the lock throughout.
+                with _DICE_LOCK, transaction.atomic():
+                    sit = Situation.objects.select_for_update().get(pk=situation_id)
+                    if sit.dice:
+                        return  # Already rolled
+                    originals = list(
+                        sit.cards.select_related('card', 'character').all()
                     )
-                # Clear the M2M (snapshots replace it)
-                sit.cards.clear()
-                # Remove originals from their owners' hands
-                for cc in originals:
-                    for hand in Hand.objects.filter(cards__pk=cc.pk):
-                        hand.cards.remove(cc.pk)
-                # Re-enable drawing for hands with no non-attribute cards left
-                affected_character_ids = set(cc.character_id for cc in originals)
-                for char_id in affected_character_ids:
-                    for hand in Hand.objects.filter(character_id=char_id):
-                        has_non_attr = hand.cards.exclude(
-                            tag__name="Attribute"
-                        ).exists()
-                        if not has_non_attr:
-                            hand.draw_active = True
-                            hand.save(update_fields=["draw_active"])
+                    n = len(originals)
+                    if n == 0:
+                        return
+                    dice = [random.randint(1, 6) for _ in range(n)]
+                    sit.dice = dice
+                    sit.save(update_fields=["dice"])
+                    # Create archived snapshot cards on the situation
+                    for cc in originals:
+                        SituationCard.objects.create(
+                            situation=sit,
+                            name=cc.card.name,
+                            notes=cc.card.notes or "",
+                            level=cc.level,
+                            character_name=cc.character.name if cc.character else "",
+                        )
+                    # Clear the M2M (snapshots replace it)
+                    sit.cards.clear()
+                    # Remove originals from their owners' hands
+                    for cc in originals:
+                        for hand in Hand.objects.filter(cards__pk=cc.pk):
+                            hand.cards.remove(cc.pk)
+                    # Re-enable drawing for hands with no non-attribute cards left
+                    affected_character_ids = set(cc.character_id for cc in originals)
+                    for char_id in affected_character_ids:
+                        for hand in Hand.objects.filter(character_id=char_id):
+                            has_non_attr = hand.cards.exclude(
+                                tag__name="Attribute"
+                            ).exists()
+                            if not has_non_attr:
+                                hand.draw_active = True
+                                hand.save(update_fields=["draw_active"])
 
             await _roll()
             await _refresh(socket)
@@ -2244,28 +2257,36 @@ async def cardplay_event_handler(event, payload, socket):
         return True
 
     if event == "assign_die":
-        card_id = payload.get("card_id", "")
-        die_index = payload.get("die_index", "")
+        card_id = str(payload.get("card_id", ""))
+        die_index = str(payload.get("die_index", ""))
         situation_id = socket.context.hand_active_situation_id
         socket.context.situation_selected_die = ""
-        if card_id and die_index != "" and situation_id:
+        if card_id and die_index.isdigit() and situation_id:
             @sync_to_async(thread_sensitive=False)
             def _assign():
                 Situation = apps.get_model('cards', 'Situation')
-                sit = Situation.objects.get(pk=situation_id)
-                if not sit.dice or sit.dice_assigned:
-                    return
                 idx = int(die_index)
-                if idx < 0 or idx >= len(sit.dice):
-                    return
-                assignments = sit.assignments or {}
-                # A die sits on at most one card, so take it off whichever
-                # card is holding it (drag-and-drop can reassign directly).
-                for other_id in [k for k, v in assignments.items() if v == idx]:
-                    assignments.pop(other_id)
-                assignments[str(card_id)] = idx
-                sit.assignments = assignments
-                sit.save(update_fields=["assignments"])
+                # Everyone at the table edits the same assignments dict, so
+                # re-read it under the lock rather than trusting what this
+                # client saw. Last write wins.
+                with _DICE_LOCK, transaction.atomic():
+                    sit = Situation.objects.select_for_update().get(pk=situation_id)
+                    if not sit.dice or sit.dice_assigned:
+                        return
+                    if idx >= len(sit.dice):
+                        return
+                    assignments = sit.assignments or {}
+                    if assignments.get(card_id) == idx:
+                        # Already where it is being dropped: leave it alone
+                        # instead of freeing and re-taking the same die.
+                        return
+                    # A die sits on at most one card, so take it off
+                    # whichever card is holding it now.
+                    for other_id in [k for k, v in assignments.items() if v == idx]:
+                        assignments.pop(other_id)
+                    assignments[card_id] = idx
+                    sit.assignments = assignments
+                    sit.save(update_fields=["assignments"])
 
             await _assign()
             await _refresh(socket)
@@ -2275,19 +2296,27 @@ async def cardplay_event_handler(event, payload, socket):
         return True
 
     if event == "unassign_die":
-        card_id = payload.get("card_id", "")
+        card_id = str(payload.get("card_id", ""))
+        die_index = str(payload.get("die_index", ""))
         situation_id = socket.context.hand_active_situation_id
         if card_id and situation_id:
             @sync_to_async(thread_sensitive=False)
             def _unassign():
                 Situation = apps.get_model('cards', 'Situation')
-                sit = Situation.objects.get(pk=situation_id)
-                if sit.dice_assigned:
-                    return
-                assignments = sit.assignments or {}
-                assignments.pop(str(card_id), None)
-                sit.assignments = assignments
-                sit.save(update_fields=["assignments"])
+                with _DICE_LOCK, transaction.atomic():
+                    sit = Situation.objects.select_for_update().get(pk=situation_id)
+                    if sit.dice_assigned:
+                        return
+                    assignments = sit.assignments or {}
+                    if card_id not in assignments:
+                        return
+                    # Clicking a die in the pool names the die it showed; if
+                    # someone moved it meanwhile, leave that card alone.
+                    if die_index.isdigit() and assignments[card_id] != int(die_index):
+                        return
+                    assignments.pop(card_id)
+                    sit.assignments = assignments
+                    sit.save(update_fields=["assignments"])
 
             await _unassign()
             await _refresh(socket)
@@ -2303,14 +2332,15 @@ async def cardplay_event_handler(event, payload, socket):
             def _lock():
                 Situation = apps.get_model('cards', 'Situation')
                 Game = apps.get_model('cards', 'Game')
-                sit = Situation.objects.get(pk=situation_id)
-                if not sit.dice or sit.dice_assigned:
-                    return
-                card_count = sit.situation_cards.count()
-                if len(sit.assignments or {}) < card_count:
-                    return
-                sit.dice_assigned = True
-                sit.save(update_fields=["dice_assigned"])
+                with _DICE_LOCK, transaction.atomic():
+                    sit = Situation.objects.select_for_update().get(pk=situation_id)
+                    if not sit.dice or sit.dice_assigned:
+                        return
+                    card_count = sit.situation_cards.count()
+                    if len(sit.assignments or {}) < card_count:
+                        return
+                    sit.dice_assigned = True
+                    sit.save(update_fields=["dice_assigned"])
 
             await _lock()
             await _refresh(socket)
