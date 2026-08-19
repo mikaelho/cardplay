@@ -67,6 +67,9 @@ window.Hooks.DiceDnd = {
                 onStart: function () {
                     hook._aborted = false;
                     hook.el.classList.add('dice-dragging');
+                    // Drop anything the press selected before it became a drag.
+                    var sel = window.getSelection && window.getSelection();
+                    if (sel && !sel.isCollapsed) sel.removeAllRanges();
                 },
                 onEnd: function () {
                     hook.el.classList.remove('dice-dragging');
