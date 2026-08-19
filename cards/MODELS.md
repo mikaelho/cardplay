@@ -15,7 +15,7 @@
 - **Character** has a name, callsign, notes, belongs to a Game, a Player, and a Sheet. Cards are shown inline grouped by tag (ordered by sheet tag position).
 - **Card** is a playable card with a name and notes. Linked to characters via CharacterCard.
 - **CharacterCard** connects a Character to a Card with a level (1-10), a `level_mod` and an optional Tag. Level is the baseline; `level_mod` is a temporary shift (short-term advantage or disadvantage) that is cleared by hand, never automatically. The current rank is `level + level_mod` clamped to 1-10, and it is that current rank which determines dice bands (bad/fair/good outcome ranges on a d6). Unique per character+card.
-- **Hand** is a named collection of CharacterCards belonging to a character.
+- **Hand** is a named collection of CharacterCards belonging to a character. No longer used in play: every card a character owns is always available, so there is no drawing and nothing to exhaust. The footer lists all of a character's cards in the same order as the character page (sheet tag order, then creation order within a tag). `Hand.cards` and `Hand.draw_active` are vestigial.
 
 ## Game play
 

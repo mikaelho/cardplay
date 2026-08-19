@@ -713,7 +713,12 @@ async def _handle_site_map_view_click(socket, click_type, click_id):
 
 
 async def load_hand_data(socket):
-    """Load hand data for the player's character."""
+    """Load the player's cards for the footer.
+
+    Every card a character owns is always available -- there is no drawing and
+    no hand to exhaust. Cards are listed in the same order as on the character
+    page: by the sheet's tag order, then by creation order within a tag.
+    """
     character_id = socket.context.hand_character_id
     if not character_id:
         return
@@ -723,42 +728,46 @@ async def load_hand_data(socket):
     @sync_to_async(thread_sensitive=False)
     def _fetch():
         CharacterCard = apps.get_model('cards', 'CharacterCard')
-        Hand = apps.get_model('cards', 'Hand')
+        Character = apps.get_model('cards', 'Character')
         Situation = apps.get_model('cards', 'Situation')
+        SheetTag = apps.get_model('cards', 'SheetTag')
+        from cards.models.card import get_bands_for_level
+        from cards.ui import render_level
 
-        non_attr_count = CharacterCard.objects.filter(
-            character_id=character_id
-        ).exclude(tag__name="Attribute").count()
+        character = Character.objects.select_related('sheet').filter(
+            pk=character_id
+        ).first()
+        tag_order = {}
+        if character and character.sheet_id:
+            tag_order = {
+                name: pos for pos, name in enumerate(
+                    SheetTag.objects.filter(sheet_id=character.sheet_id)
+                    .order_by('position').values_list('tag__name', flat=True)
+                )
+            }
 
-        hand = Hand.objects.filter(character_id=character_id).order_by('-id').first()
+        cards = list(
+            CharacterCard.objects.filter(character_id=character_id)
+            .select_related('card', 'tag').order_by('pk')
+        )
+
+        # Tags the sheet does not list fall after the ordered ones, in the
+        # order they first appear -- same as the character page grouping.
+        unlisted = {}
+
+        def group_key(cc):
+            name = cc.tag.name if cc.tag else ""
+            if name in tag_order:
+                return (0, tag_order[name])
+            unlisted.setdefault(name, len(unlisted))
+            return (1, unlisted[name])
+
+        cards.sort(key=group_key)  # stable, so pk order holds within a tag
+
         hand_cards = []
-        hand_drawn = False
-        if hand:
-            hand_drawn = True
-            for cc in hand.cards.select_related('card', 'tag').all():
-                from cards.models.card import get_bands_for_level
-                from cards.ui import render_level
-                hand_cards.append({
-                    "id": str(cc.pk),
-                    "name": cc.card.name,
-                    "notes": cc.card.notes or "",
-                    "level": cc.effective_level,
-                    "level_html": render_level(cc.level, cc.level_mod),
-                    "bands": get_bands_for_level(cc.effective_level),
-                    "is_attribute": cc.tag_id is not None and cc.tag.name == "Attribute",
-                })
-
-            # Add attribute cards not already in the hand (always shown)
-            hand_pks = set(hand.cards.values_list('pk', flat=True))
-        else:
-            hand_pks = set()
-
-        # Always add attribute cards (shown regardless of draw state)
-        for cc in CharacterCard.objects.filter(
-            character_id=character_id, tag__name="Attribute"
-        ).select_related('card', 'tag').exclude(pk__in=hand_pks):
-            from cards.models.card import get_bands_for_level
-            from cards.ui import render_level
+        previous_tag = None
+        for cc in cards:
+            tag_name = cc.tag.name if cc.tag else ""
             hand_cards.append({
                 "id": str(cc.pk),
                 "name": cc.card.name,
@@ -766,19 +775,11 @@ async def load_hand_data(socket):
                 "level": cc.effective_level,
                 "level_html": render_level(cc.level, cc.level_mod),
                 "bands": get_bands_for_level(cc.effective_level),
-                "is_attribute": True,
+                "is_attribute": tag_name == "Attribute",
+                "tag": tag_name,
+                "group_start": bool(hand_cards) and tag_name != previous_tag,
             })
-
-        # Sort: attribute cards first, then normal cards
-        hand_cards.sort(key=lambda c: (not c["is_attribute"], c["name"]))
-
-        # Mark first non-attribute card for visual separator
-        has_attr = any(c["is_attribute"] for c in hand_cards)
-        if has_attr:
-            for c in hand_cards:
-                if not c["is_attribute"]:
-                    c["separator_before"] = True
-                    break
+            previous_tag = tag_name
 
         # Look up active situation (latest by pk for this game)
         active_sit = None
@@ -796,27 +797,13 @@ async def load_hand_data(socket):
 
         sit_dice = active_sit.dice if active_sit else []
 
-        # Determine if player can draw more cards
-        # No drawing during an active situation or when draw_active is False
-        drawn_non_attr = sum(1 for c in hand_cards if not c["is_attribute"])
-        has_active_situation = game_id and Situation.objects.filter(
-            game_id=game_id, situation_type="situation", resolved=False
-        ).exists()
-        draw_active = not hand or hand.draw_active
-        hand_can_draw = (
-            not has_active_situation
-            and draw_active
-            and drawn_non_attr < non_attr_count
-        )
+        return hand_cards, active_sit, sit_dice, {str(pk) for pk in situation_card_pks}
 
-        return non_attr_count, hand_cards, hand_drawn, hand_can_draw, active_sit, sit_dice
+    hand_cards, active_sit, sit_dice, situation_card_pks = await _fetch()
 
-    non_attr_count, hand_cards, hand_drawn, hand_can_draw, active_sit, sit_dice = await _fetch()
-
-    socket.context.hand_card_count = non_attr_count
-    socket.context.hand_drawn = hand_drawn
+    socket.context.hand_card_count = len(hand_cards)
     socket.context.hand_cards = hand_cards
-    socket.context.hand_can_draw = hand_can_draw
+    socket.context.situation_card_pks = situation_card_pks
     socket.context.hand_active_situation_id = active_sit.pk if active_sit else None
     # Only set situation_dice if not already set by load_situation_data (which has richer data)
     if not socket.context.situation_dice:
@@ -945,29 +932,6 @@ async def cardplay_event_handler(event, payload, socket):
         socket.context.hand_collapsed = not socket.context.hand_collapsed
         return True
 
-    if event == "draw_hand":
-        character_id = socket.context.hand_character_id
-        if character_id:
-            @sync_to_async(thread_sensitive=False)
-            def _draw_one():
-                CharacterCard = apps.get_model('cards', 'CharacterCard')
-                Hand = apps.get_model('cards', 'Hand')
-
-                hand, _created = Hand.objects.get_or_create(
-                    character_id=character_id, defaults={"name": "Hand"}
-                )
-                existing_pks = set(hand.cards.values_list('pk', flat=True))
-                available = list(CharacterCard.objects.filter(
-                    character_id=character_id
-                ).exclude(tag__name="Attribute").exclude(pk__in=existing_pks))
-                if available:
-                    card = random.choice(available)
-                    hand.cards.add(card)
-
-            await _draw_one()
-            await load_hand_data(socket)
-        return True
-
     if event == "toggle_hand_situation":
         card_id = payload.get("card_id", "")
         situation_id = socket.context.hand_active_situation_id
@@ -1003,6 +967,8 @@ async def cardplay_event_handler(event, payload, socket):
 
             await _toggle()
             await load_hand_data(socket)
+            # Items are not rebuilt here, so refresh the toggles in place.
+            _stamp_situation_actions(socket)
             await _broadcast(socket, HexMap)
         return True
 
@@ -1711,7 +1677,6 @@ async def cardplay_event_handler(event, payload, socket):
             def _create_entry():
                 Situation = apps.get_model('cards', 'Situation')
                 Game = apps.get_model('cards', 'Game')
-                Hand = apps.get_model('cards', 'Hand')
                 loc = ""
                 hm = HexMap.objects.filter(game_id=game_id).first()
                 if hm and hm.party_location:
@@ -1722,11 +1687,6 @@ async def cardplay_event_handler(event, payload, socket):
                     situation_type=sit_type, location=loc,
                     game_time=game.game_time or {},
                 )
-                # Lock drawing for all players when a situation starts
-                if sit_type == "situation":
-                    Hand.objects.filter(
-                        character__game_id=game_id
-                    ).update(draw_active=False)
                 return entry
             await _create_entry()
         socket.context.map_create_open = False
@@ -2216,7 +2176,6 @@ async def cardplay_event_handler(event, payload, socket):
             @sync_to_async(thread_sensitive=False)
             def _roll():
                 Situation = apps.get_model('cards', 'Situation')
-                Hand = apps.get_model('cards', 'Hand')
                 SituationCard = apps.get_model('cards', 'SituationCard')
                 Game = apps.get_model('cards', 'Game')
                 # Two players can hit Roll at the same moment; the whole
@@ -2244,22 +2203,10 @@ async def cardplay_event_handler(event, payload, socket):
                             level_mod=cc.level_mod,
                             character_name=cc.character.name if cc.character else "",
                         )
-                    # Clear the M2M (snapshots replace it)
+                    # Clear the M2M (snapshots replace it). The cards
+                    # themselves stay with their characters -- playing one no
+                    # longer spends it.
                     sit.cards.clear()
-                    # Remove originals from their owners' hands
-                    for cc in originals:
-                        for hand in Hand.objects.filter(cards__pk=cc.pk):
-                            hand.cards.remove(cc.pk)
-                    # Re-enable drawing for hands with no non-attribute cards left
-                    affected_character_ids = set(cc.character_id for cc in originals)
-                    for char_id in affected_character_ids:
-                        for hand in Hand.objects.filter(character_id=char_id):
-                            has_non_attr = hand.cards.exclude(
-                                tag__name="Attribute"
-                            ).exists()
-                            if not has_non_attr:
-                                hand.draw_active = True
-                                hand.save(update_fields=["draw_active"])
 
             await _roll()
             await _refresh(socket)
@@ -2618,6 +2565,7 @@ def _make_params_hook(conf_template):
             await load_situation_data(socket, is_situation, is_map)
         if is_map:
             await load_map_data(socket)
+        _stamp_situation_actions(socket)
     return cardplay_params_hook
 
 
@@ -2634,7 +2582,38 @@ def _make_refresh_hook(conf_template):
             await load_map_data(socket)
         if socket.context.hand_is_player:
             await load_hand_data(socket)
+        _stamp_situation_actions(socket)
     return cardplay_refresh_hook
+
+
+def _stamp_situation_actions(socket):
+    """Offer an add/remove toggle on a character's cards while a situation is
+    open for picking.
+
+    alive renders whatever actions an app hangs on an inline item; which cards
+    are in play, and what that means, stays here.
+    """
+    if not socket.context.hand_active_situation_id or socket.context.situation_dice:
+        return
+    in_situation = socket.context.situation_card_pks
+    for item in socket.context.items or []:
+        for section in item.get("inline_sections") or []:
+            if section.get("relation_name") != "character_cards":
+                continue
+            for group in section.get("groups") or []:
+                for related in group.get("related_items") or []:
+                    picked = related.get("id") in in_situation
+                    related["actions"] = [{
+                        "event": "toggle_hand_situation",
+                        "value_key": "card_id",
+                        "label": "\u2713" if picked else "+",
+                        "title": ("Remove from situation" if picked
+                                  else "Add to situation"),
+                        "css": ("btn btn-xs btn-circle btn-primary"
+                                if picked else
+                                "btn btn-xs btn-circle btn-ghost "
+                                "text-base-content/40 hover:text-base-content"),
+                    }]
 
 
 # --- Info Hook ---

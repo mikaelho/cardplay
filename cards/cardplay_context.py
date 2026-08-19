@@ -13,9 +13,8 @@ class CardplayContext(ModelContext):
     hand_is_player: bool = False
     hand_character_id: int | None = None
     hand_card_count: int = 0
-    hand_drawn: bool = False
     hand_cards: list[dict] = field(default_factory=list)
-    hand_can_draw: bool = False
+    situation_card_pks: set = field(default_factory=set)
     hand_collapsed: bool = False
     hand_active_situation_id: int | None = None
     # Situation
