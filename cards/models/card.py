@@ -25,6 +25,19 @@ bands = {
 
 band_labels = ("Bad", "So-so", "Good")
 
+LEVEL_MIN = 1
+LEVEL_MAX = 10
+
+
+def effective_level(level: int, level_mod: int = 0) -> int:
+    """Current rank: the baseline shifted by a temporary modifier."""
+    return max(LEVEL_MIN, min(LEVEL_MAX, (level or 0) + (level_mod or 0)))
+
+
+def clamp_mod(level: int, level_mod: int) -> int:
+    """Clamp a modifier so the resulting rank stays in range."""
+    return max(LEVEL_MIN - level, min(LEVEL_MAX - level, level_mod))
+
 
 def get_bands_for_level(level: int) -> list[dict]:
     """Return band breakdown for a level, Good first, with aligned dice ranges."""

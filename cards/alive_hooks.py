@@ -87,6 +87,7 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
 
         # Load cards in the active situation
         from cards.models.card import get_bands_for_level, get_band_for_die
+        from cards.ui import render_level
         cards = []
         if dice:
             # Post-roll: read from SituationCard snapshots
@@ -97,9 +98,11 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
                 assigned_band_label = None
                 if assigned_die_index is not None and assigned_die_index < len(dice):
                     assigned_die_value = dice[assigned_die_index]
-                    assigned_band_label = get_band_for_die(sc.level, assigned_die_value)
+                    assigned_band_label = get_band_for_die(
+                        sc.effective_level, assigned_die_value
+                    )
 
-                card_bands = get_bands_for_level(sc.level)
+                card_bands = get_bands_for_level(sc.effective_level)
                 for band in card_bands:
                     band["highlighted"] = (band["label"] == assigned_band_label) if assigned_band_label else False
 
@@ -113,7 +116,9 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
                     "name": sc.name,
                     "notes": sc.notes,
                     "character_name": sc.character_name,
-                    "level": sc.level,
+                    "level": sc.effective_level,
+                    "level_html": render_level(sc.level, sc.level_mod),
+                    "level_shifted": bool(sc.level_mod),
                     "bands": card_bands,
                     "assigned_die_value": assigned_die_value,
                     "assigned_die_index": assigned_die_index,
@@ -129,8 +134,10 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
                     "name": cc.card.name,
                     "notes": cc.card.notes or "",
                     "character_name": cc.character.name if cc.character else "",
-                    "level": cc.level,
-                    "bands": get_bands_for_level(cc.level),
+                    "level": cc.effective_level,
+                    "level_html": render_level(cc.level, cc.level_mod),
+                    "level_shifted": bool(cc.level_mod),
+                    "bands": get_bands_for_level(cc.effective_level),
                     "assigned_die_value": None,
                     "assigned_die_index": None,
                     "available_dice": [],
@@ -227,7 +234,8 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
             keeper_cards = []
             if keeper_char_id:
                 keeper_cards = [
-                    {"id": str(cc.pk), "name": cc.card.name, "level": cc.level}
+                    {"id": str(cc.pk), "name": cc.card.name,
+                     "level": cc.effective_level}
                     for cc in CharacterCard.objects.filter(
                         character_id=keeper_char_id
                     ).select_related('card')
@@ -243,7 +251,8 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
             ).order_by('name')
             for char in player_chars:
                 char_cards = [
-                    {"id": str(cc.pk), "name": cc.card.name, "level": cc.level}
+                    {"id": str(cc.pk), "name": cc.card.name,
+                     "level": cc.effective_level}
                     for cc in CharacterCard.objects.filter(
                         character_id=char.pk
                     ).select_related('card')
@@ -327,7 +336,9 @@ async def _refresh_map_detail(socket):
                     assigned_die_index = assignments.get(card_id)
                     band = ""
                     if assigned_die_index is not None and assigned_die_index < len(dice):
-                        band = get_band_for_die(sc.level, dice[assigned_die_index]) or ""
+                        band = get_band_for_die(
+                            sc.effective_level, dice[assigned_die_index]
+                        ) or ""
                     detail_cards.append({
                         "name": sc.name,
                         "notes": sc.notes,
@@ -726,12 +737,14 @@ async def load_hand_data(socket):
             hand_drawn = True
             for cc in hand.cards.select_related('card', 'tag').all():
                 from cards.models.card import get_bands_for_level
+                from cards.ui import render_level
                 hand_cards.append({
                     "id": str(cc.pk),
                     "name": cc.card.name,
                     "notes": cc.card.notes or "",
-                    "level": cc.level,
-                    "bands": get_bands_for_level(cc.level),
+                    "level": cc.effective_level,
+                    "level_html": render_level(cc.level, cc.level_mod),
+                    "bands": get_bands_for_level(cc.effective_level),
                     "is_attribute": cc.tag_id is not None and cc.tag.name == "Attribute",
                 })
 
@@ -745,12 +758,14 @@ async def load_hand_data(socket):
             character_id=character_id, tag__name="Attribute"
         ).select_related('card', 'tag').exclude(pk__in=hand_pks):
             from cards.models.card import get_bands_for_level
+            from cards.ui import render_level
             hand_cards.append({
                 "id": str(cc.pk),
                 "name": cc.card.name,
                 "notes": cc.card.notes or "",
-                "level": cc.level,
-                "bands": get_bands_for_level(cc.level),
+                "level": cc.effective_level,
+                "level_html": render_level(cc.level, cc.level_mod),
+                "bands": get_bands_for_level(cc.effective_level),
                 "is_attribute": True,
             })
 
@@ -1012,24 +1027,31 @@ async def cardplay_event_handler(event, payload, socket):
             await _broadcast(socket, HexMap)
         return True
 
-    if event == "adjust_situation_card_level":
+    if event in ("adjust_situation_card_level", "adjust_situation_card_baseline"):
+        # The arrows shift the card temporarily; right-click / long-press moves
+        # the baseline the card returns to.
+        permanent = event == "adjust_situation_card_baseline"
         card_id = payload.get("card_id", "")
         delta = int(payload.get("delta", 0))
         if card_id and delta and socket.context.is_keeper:
+            # Before the roll the cards are still the characters' own; after it
+            # they are frozen snapshots on the situation.
             has_dice = bool(socket.context.situation_dice)
 
             @sync_to_async(thread_sensitive=False)
             def _adjust():
-                if has_dice:
-                    SituationCard = apps.get_model('cards', 'SituationCard')
-                    sc = SituationCard.objects.get(pk=int(card_id))
-                    sc.level = max(1, min(10, sc.level + delta))
-                    sc.save(update_fields=["level"])
+                from cards.models.card import LEVEL_MAX, LEVEL_MIN, clamp_mod
+                model_name = 'SituationCard' if has_dice else 'CharacterCard'
+                card = apps.get_model('cards', model_name).objects.get(
+                    pk=int(card_id)
+                )
+                if permanent:
+                    card.level = max(LEVEL_MIN, min(LEVEL_MAX, card.level + delta))
+                    # Keep the shift meaningful against the new baseline.
+                    card.level_mod = clamp_mod(card.level, card.level_mod)
                 else:
-                    CharacterCard = apps.get_model('cards', 'CharacterCard')
-                    cc = CharacterCard.objects.get(pk=int(card_id))
-                    cc.level = max(1, min(10, cc.level + delta))
-                    cc.save(update_fields=["level"])
+                    card.level_mod = clamp_mod(card.level, card.level_mod + delta)
+                card.save(update_fields=["level", "level_mod"])
 
             await _adjust()
             await _refresh(socket)
@@ -2219,6 +2241,7 @@ async def cardplay_event_handler(event, payload, socket):
                             name=cc.card.name,
                             notes=cc.card.notes or "",
                             level=cc.level,
+                            level_mod=cc.level_mod,
                             character_name=cc.character.name if cc.character else "",
                         )
                     # Clear the M2M (snapshots replace it)

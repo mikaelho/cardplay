@@ -60,6 +60,28 @@ DIE_CSS = Markup('''<style>
 </style>''')
 
 
+def render_level(level: int, level_mod: int = 0) -> Markup:
+    """Render a card's rank: the current value, with the baseline beside it in
+    small faint type whenever a temporary modifier is in play.
+
+    The current value inherits the caller's font size so the same markup works
+    at any scale; colour carries the direction of the shift.
+    """
+    from cards.models.card import effective_level
+
+    level = level or 0
+    level_mod = level_mod or 0
+    current = effective_level(level, level_mod)
+    if not level_mod:
+        return Markup(f'<span class="font-bold leading-none">{current}</span>')
+    tone = "text-success" if level_mod > 0 else "text-error"
+    return Markup(
+        f'<span class="font-bold leading-none {tone}">{current}</span>'
+        f'<span class="text-xs font-normal text-base-content/40 leading-none '
+        f'ml-0.5 align-top" title="Baseline {level}">{level}</span>'
+    )
+
+
 def render_rating(value: int, name: str = "rating") -> str:
     """
     Render a rating component for values 1-10 using half-ball increments.

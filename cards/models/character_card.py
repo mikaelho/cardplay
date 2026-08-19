@@ -27,6 +27,9 @@ class CharacterCard(models.Model, AliveMixin):
         related_name="character_cards",
     )
     level = models.PositiveSmallIntegerField(default=4)
+    # Temporary shift away from the baseline level -- a short-term advantage
+    # or disadvantage. Cleared by hand, never automatically.
+    level_mod = models.SmallIntegerField(default=0)
     tag = models.ForeignKey(
         "Tag",
         on_delete=models.SET_NULL,
@@ -38,21 +41,42 @@ class CharacterCard(models.Model, AliveMixin):
     class Meta:
         unique_together = [["character", "card"]]
 
+    @property
+    def effective_level(self) -> int:
+        from .card import effective_level
+        return effective_level(self.level, self.level_mod)
+
     def __str__(self):
         return f"{self.character} - {self.card} (level {self.level})"
 
     @classmethod
+    def get_inline_extra_fields(cls, inline_info: dict) -> list[dict]:
+        """Hide level_mod from the inline create form -- it is set with the
+        situation card controls, not typed in when a card is added."""
+        return [
+            f for f in super().get_inline_extra_fields(inline_info)
+            if f.get("name") != "level_mod"
+        ]
+
+    @classmethod
     def get_inline_display_data(cls, item_data: dict) -> dict:
         """Compute extra display data for inline rendering."""
-        from .card import get_bands_for_level
-        from cards.ui import render_rating
-        level = item_data["through_fields"].get("level", 4)
+        from .card import get_bands_for_level, effective_level
+        from cards.ui import render_rating, render_level
+        fields = item_data["through_fields"]
+        level = fields.get("level", 4)
         if isinstance(level, str):
             level = int(level) if level else 4
+        mod = fields.get("level_mod", 0)
+        if isinstance(mod, str):
+            mod = int(mod) if mod else 0
+        current = effective_level(level, mod)
         return {
-            "bands": get_bands_for_level(level),
-            "rating_html": render_rating(level),
-            "level": level,
+            "bands": get_bands_for_level(current),
+            "rating_html": render_rating(current),
+            # Rendered rather than a bare number so the baseline shows through
+            # alive's generic inline level display.
+            "level": render_level(level, mod),
         }
 
     @classmethod

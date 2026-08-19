@@ -12,8 +12,14 @@ class SituationCard(models.Model):
     name = models.CharField(max_length=200)
     notes = models.TextField(blank=True)
     level = models.PositiveSmallIntegerField(default=4)
+    level_mod = models.SmallIntegerField(default=0)
     character_name = models.CharField(max_length=200, blank=True)
     used = models.BooleanField(default=False)
+
+    @property
+    def effective_level(self) -> int:
+        from .card import effective_level
+        return effective_level(self.level, self.level_mod)
 
     def __str__(self):
         return f"{self.name} ({self.character_name})"

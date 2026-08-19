@@ -24,7 +24,7 @@
                         {% endif %}
                         {% if card.level %}
                         <div class="flex gap-2 items-center mt-2">
-                            <span class="text-2xl font-bold leading-none">{{card.level}}</span>
+                            <span class="text-2xl">{{card.level_html}}</span>
                             {% if card.bands %}
                             <div class="flex flex-col">
                                 {% for band in card.bands %}
@@ -57,7 +57,7 @@
                         {% endif %}
                         {% if card.level %}
                         <div class="flex gap-2 items-center mt-2">
-                            <span class="text-2xl font-bold leading-none">{{card.level}}</span>
+                            <span class="text-2xl">{{card.level_html}}</span>
                             {% if card.bands %}
                             <div class="flex flex-col">
                                 {% for band in card.bands %}
