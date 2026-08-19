@@ -157,6 +157,16 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
         for i, v in enumerate(dice)
     ] if dice else []
 
+    # A die stays selected only while it is still free and assignable.
+    selected = socket.context.situation_selected_die
+    if selected:
+        idx = int(selected)
+        if dice_assigned or idx >= len(dice) or idx in assigned_indices:
+            selected = ""
+            socket.context.situation_selected_die = ""
+    for die in dice_display:
+        die["selected"] = str(die["index"]) == selected
+
     # Add SVGs to card data
     dashed_svg = render_die_svg(0, css_class="h-8 w-8", dashed=True)
     for card in cards:
@@ -186,6 +196,7 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
     socket.context.situation_dice_assigned = dice_assigned
     socket.context.situation_resolved = resolved
     socket.context.situation_all_assigned = bool(dice and cards and len(assignments) >= len(cards))
+    socket.context.situation_selected_die = selected
 
     if is_map_page:
         socket.context.map_situation_active = not resolved
@@ -2221,10 +2232,22 @@ async def cardplay_event_handler(event, payload, socket):
             await _broadcast(socket, HexMap)
         return True
 
+    if event == "select_die":
+        # Click a free die to arm it, then click a card slot to assign it.
+        die_index = str(payload.get("die_index", ""))
+        current = socket.context.situation_selected_die
+        if not die_index.isdigit() or die_index == current:
+            socket.context.situation_selected_die = ""
+        else:
+            socket.context.situation_selected_die = die_index
+        await _refresh(socket)
+        return True
+
     if event == "assign_die":
         card_id = payload.get("card_id", "")
         die_index = payload.get("die_index", "")
         situation_id = socket.context.hand_active_situation_id
+        socket.context.situation_selected_die = ""
         if card_id and die_index != "" and situation_id:
             @sync_to_async(thread_sensitive=False)
             def _assign():

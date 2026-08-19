@@ -126,8 +126,14 @@
             {% endif %}
             {% endif %}
             <div class="flex gap-2 items-center mt-auto">
-                <div class="die-slot" data-card-id="{{card.id}}">
-                {% if card.assigned_die_value %}
+                <div class="die-slot {% if situation_selected_die %}die-slot-armed{% endif %}" data-card-id="{{card.id}}">
+                {% if situation_selected_die %}
+                <span class="cursor-pointer {% if card.assigned_die_value %}die-primary die-drag{% endif %}"
+                      {% if card.assigned_die_value %}data-die-index="{{card.assigned_die_index}}"{% endif %}
+                      phx-click="assign_die" phx-value-card_id="{{card.id}}" phx-value-die_index="{{situation_selected_die}}">
+                    {% if card.assigned_die_value %}{{card.assigned_die_svg}}{% else %}{{card.placeholder_svg}}{% endif %}
+                </span>
+                {% elif card.assigned_die_value %}
                 <details class="dropdown die-drag" data-die-index="{{card.assigned_die_index}}">
                     <summary class="list-none cursor-grab die-primary">{{card.assigned_die_svg}}</summary>
                     <div class="dropdown-content bg-base-200 rounded-box z-50 p-2 shadow-lg mt-1">
