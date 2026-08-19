@@ -22,6 +22,11 @@
         user-select: none;
         -webkit-user-select: none;
     }
+    /* Sortable parks the drop placeholder inside the slot it is over. That die
+       is the preview, so the slot's own dashed placeholder (or the die already
+       sitting there) and the drop outline would only crowd it. */
+    .die-slot:has(.die-drag-ghost) > :not(.die-drag-ghost) { display: none; }
+    .dice-dragging .die-slot:has(.die-drag-ghost) { outline: none; }
 </style>
 <div class="container mx-auto p-4 max-w-5xl">
     {% if breadcrumbs %}
