@@ -144,7 +144,9 @@
     </style>
     <div class="card bg-base-100 shadow-lg border-2 border-primary mb-4">
         <div class="card-body">
-            <div class="flex justify-between items-center mb-2">
+            <!-- Kept at button height so the row does not grow when a button
+                 appears and push the rest of the panel down. -->
+            <div class="flex justify-between items-center mb-2" style="min-height: 2.5rem;">
                 <h2 class="text-xl font-bold">{{active_situation_name}}</h2>
                 <div class="flex gap-2">
                     {% if is_keeper and not situation_dice %}

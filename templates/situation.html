@@ -91,9 +91,11 @@
         <div class="flex-1">
             <div class="card bg-base-100 shadow-sm">
                 <div class="card-body">
-                    <div class="flex justify-between items-center">
+                    <!-- Kept at button height so the row does not grow when a
+                         button appears and push everything below it down. -->
+                    <div class="flex justify-between items-center gap-2" style="min-height: 2.5rem;">
                         <input type="text" value="{{active_situation_name}}" phx-blur="rename_situation" name="name"
-                               class="text-2xl font-bold bg-transparent border-none outline-none focus:border-b focus:border-primary w-full" />
+                               class="text-2xl font-bold bg-transparent border-none outline-none focus:border-b focus:border-primary w-full min-w-0" />
                         {% if situation_cards and not situation_dice %}
                         <button class="btn btn-primary" phx-click="roll_situation">Roll</button>
                         {% endif %}
