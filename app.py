@@ -271,7 +271,6 @@ def custom_root_template(context: RootTemplateContext) -> str:
       <script src="{static_url('/django-static/alive/js/keyboard.js')}"></script>
       <script src="{static_url('/django-static/cards/js/hexmap.js')}"></script>
       <script src="{static_url('/django-static/cards/js/dice_dnd.js')}"></script>
-      <script src="{static_url('/django-static/cards/js/level_adjust.js')}"></script>
       <script defer type="text/javascript" src="/static/assets/app.js"></script>
       {additional_head_elements}
     </head>

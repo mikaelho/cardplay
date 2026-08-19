@@ -28,6 +28,8 @@ class CardplayContext(ModelContext):
     situation_resolved: bool = False
     situation_all_assigned: bool = False
     situation_selected_die: str = ""
+    baseline_editing_id: str = ""
+    baseline_editing_scope: str = ""
     situation_card_editing_id: str = ""
     situation_card_editing_field: str = ""
     situation_card_editing_value: str = ""

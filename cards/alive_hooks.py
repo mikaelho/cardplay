@@ -47,6 +47,35 @@ async def _push_client_event(socket, event_name, payload):
         pass
 
 
+def _in_baseline_mode(socket, card_id, scope):
+    """Has this card's number been clicked to retarget its arrows?"""
+    return (str(card_id) == socket.context.baseline_editing_id
+            and scope == socket.context.baseline_editing_scope)
+
+
+@sync_to_async(thread_sensitive=False)
+def _adjust_rank(model_name, pk, delta):
+    """Shift a card's rank temporarily, leaving its baseline alone.
+
+    The modifier is what gets clamped, so a card pinned at the bottom of the
+    range does not quietly accumulate a shift that only shows up later.
+    """
+    from cards.models.card import clamp_mod
+    card = apps.get_model('cards', model_name).objects.get(pk=int(pk))
+    card.level_mod = clamp_mod(card.level, card.level_mod + delta)
+    card.save(update_fields=["level_mod"])
+
+
+@sync_to_async(thread_sensitive=False)
+def _shift_baseline(model_name, pk, delta):
+    """Move a card's baseline rank, keeping any shift meaningful against it."""
+    from cards.models.card import LEVEL_MAX, LEVEL_MIN, clamp_mod
+    card = apps.get_model('cards', model_name).objects.get(pk=int(pk))
+    card.level = max(LEVEL_MIN, min(LEVEL_MAX, card.level + delta))
+    card.level_mod = clamp_mod(card.level, card.level_mod)
+    card.save(update_fields=["level", "level_mod"])
+
+
 # --- Data Loaders (moved from views.py private methods) ---
 
 async def load_situation_data(socket, is_situation_page, is_map_page):
@@ -88,6 +117,10 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
         # Load cards in the active situation
         from cards.models.card import get_bands_for_level, get_band_for_die
         from cards.ui import render_level
+        baseline_editing = (
+            socket.context.baseline_editing_id
+            if socket.context.baseline_editing_scope == "situation" else ""
+        )
         cards = []
         if dice:
             # Post-roll: read from SituationCard snapshots
@@ -117,7 +150,10 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
                     "notes": sc.notes,
                     "character_name": sc.character_name,
                     "level": sc.effective_level,
-                    "level_html": render_level(sc.level, sc.level_mod),
+                    "level_html": render_level(
+                        sc.level, sc.level_mod, card_id=card_id,
+                        scope="situation", editing=(card_id == baseline_editing),
+                    ),
                     "level_shifted": bool(sc.level_mod),
                     "bands": card_bands,
                     "assigned_die_value": assigned_die_value,
@@ -135,7 +171,10 @@ async def load_situation_data(socket, is_situation_page, is_map_page):
                     "notes": cc.card.notes or "",
                     "character_name": cc.character.name if cc.character else "",
                     "level": cc.effective_level,
-                    "level_html": render_level(cc.level, cc.level_mod),
+                    "level_html": render_level(
+                        cc.level, cc.level_mod, card_id=str(cc.pk),
+                        scope="situation", editing=(str(cc.pk) == baseline_editing),
+                    ),
                     "level_shifted": bool(cc.level_mod),
                     "bands": get_bands_for_level(cc.effective_level),
                     "assigned_die_value": None,
@@ -968,7 +1007,7 @@ async def cardplay_event_handler(event, payload, socket):
             await _toggle()
             await load_hand_data(socket)
             # Items are not rebuilt here, so refresh the toggles in place.
-            _stamp_situation_actions(socket)
+            _stamp_inline_card_controls(socket)
             await _broadcast(socket, HexMap)
         return True
 
@@ -993,35 +1032,49 @@ async def cardplay_event_handler(event, payload, socket):
             await _broadcast(socket, HexMap)
         return True
 
-    if event in ("adjust_situation_card_level", "adjust_situation_card_baseline"):
-        # The arrows shift the card temporarily; right-click / long-press moves
-        # the baseline the card returns to.
-        permanent = event == "adjust_situation_card_baseline"
-        card_id = payload.get("card_id", "")
+    if event == "adjust_situation_card_level":
+        card_id = str(payload.get("card_id", ""))
         delta = int(payload.get("delta", 0))
         if card_id and delta and socket.context.is_keeper:
             # Before the roll the cards are still the characters' own; after it
             # they are frozen snapshots on the situation.
-            has_dice = bool(socket.context.situation_dice)
-
-            @sync_to_async(thread_sensitive=False)
-            def _adjust():
-                from cards.models.card import LEVEL_MAX, LEVEL_MIN, clamp_mod
-                model_name = 'SituationCard' if has_dice else 'CharacterCard'
-                card = apps.get_model('cards', model_name).objects.get(
-                    pk=int(card_id)
-                )
-                if permanent:
-                    card.level = max(LEVEL_MIN, min(LEVEL_MAX, card.level + delta))
-                    # Keep the shift meaningful against the new baseline.
-                    card.level_mod = clamp_mod(card.level, card.level_mod)
-                else:
-                    card.level_mod = clamp_mod(card.level, card.level_mod + delta)
-                card.save(update_fields=["level", "level_mod"])
-
-            await _adjust()
+            model_name = ('SituationCard' if socket.context.situation_dice
+                          else 'CharacterCard')
+            if _in_baseline_mode(socket, card_id, "situation"):
+                await _shift_baseline(model_name, card_id, delta)
+            else:
+                await _adjust_rank(model_name, card_id, delta)
             await _refresh(socket)
             await _broadcast(socket, HexMap)
+        return True
+
+    if event == "adjust_inline_field" and payload.get("field") == "level":
+        # alive's generic inline arrows on a character's cards. Same bargain as
+        # the situation view: a click shifts the card temporarily, and the
+        # baseline moves only on right-click / long-press (below). Handling it
+        # here stops alive writing straight to `level`.
+        through_pk = str(payload.get("through_pk", ""))
+        delta = int(payload.get("delta", 0))
+        if through_pk and delta:
+            if _in_baseline_mode(socket, through_pk, "character"):
+                await _shift_baseline('CharacterCard', through_pk, delta)
+            else:
+                await _adjust_rank('CharacterCard', through_pk, delta)
+            await _refresh(socket)
+            await _broadcast(socket, HexMap)
+        return True
+
+    if event == "start_baseline_edit":
+        # Clicking the number toggles that card's arrows between shifting it
+        # and moving its baseline.
+        card_id = str(payload.get("card_id", ""))
+        scope = payload.get("scope", "")
+        if card_id and not (scope == "situation" and not socket.context.is_keeper):
+            already = (card_id == socket.context.baseline_editing_id
+                       and scope == socket.context.baseline_editing_scope)
+            socket.context.baseline_editing_id = "" if already else card_id
+            socket.context.baseline_editing_scope = "" if already else scope
+            await _refresh(socket)
         return True
 
     if event == "start_situation_card_edit":
@@ -2565,7 +2618,7 @@ def _make_params_hook(conf_template):
             await load_situation_data(socket, is_situation, is_map)
         if is_map:
             await load_map_data(socket)
-        _stamp_situation_actions(socket)
+        _stamp_inline_card_controls(socket)
     return cardplay_params_hook
 
 
@@ -2582,38 +2635,56 @@ def _make_refresh_hook(conf_template):
             await load_map_data(socket)
         if socket.context.hand_is_player:
             await load_hand_data(socket)
-        _stamp_situation_actions(socket)
+        _stamp_inline_card_controls(socket)
     return cardplay_refresh_hook
 
 
-def _stamp_situation_actions(socket):
-    """Offer an add/remove toggle on a character's cards while a situation is
-    open for picking.
+def _stamp_inline_card_controls(socket):
+    """Add the cardplay-specific controls to a character's inline card list.
 
-    alive renders whatever actions an app hangs on an inline item; which cards
-    are in play, and what that means, stays here.
+    alive renders whatever an app hangs on an inline item; what those controls
+    mean -- which cards are in play, which baseline is being edited -- stays
+    here, where the socket is visible.
     """
-    if not socket.context.hand_active_situation_id or socket.context.situation_dice:
-        return
+    from cards.ui import render_level
+
+    offering = bool(socket.context.hand_active_situation_id) and not socket.context.situation_dice
     in_situation = socket.context.situation_card_pks
+    editing = (
+        socket.context.baseline_editing_id
+        if socket.context.baseline_editing_scope == "character" else ""
+    )
+    if not offering and not editing:
+        return
+
     for item in socket.context.items or []:
         for section in item.get("inline_sections") or []:
             if section.get("relation_name") != "character_cards":
                 continue
             for group in section.get("groups") or []:
                 for related in group.get("related_items") or []:
-                    picked = related.get("id") in in_situation
-                    related["actions"] = [{
-                        "event": "toggle_hand_situation",
-                        "value_key": "card_id",
-                        "label": "\u2713" if picked else "+",
-                        "title": ("Remove from situation" if picked
-                                  else "Add to situation"),
-                        "css": ("btn btn-xs btn-circle btn-primary"
-                                if picked else
-                                "btn btn-xs btn-circle btn-ghost "
-                                "text-base-content/40 hover:text-base-content"),
-                    }]
+                    card_id = related.get("id")
+                    if offering:
+                        picked = card_id in in_situation
+                        related["actions"] = [{
+                            "event": "toggle_hand_situation",
+                            "value_key": "card_id",
+                            "label": "\u2713" if picked else "+",
+                            "title": ("Remove from situation" if picked
+                                      else "Add to situation"),
+                            "css": ("btn btn-xs btn-circle btn-primary"
+                                    if picked else
+                                    "btn btn-xs btn-circle btn-ghost "
+                                    "text-base-content/40 hover:text-base-content"),
+                        }]
+                    if card_id == editing:
+                        fields = related.get("through_fields") or {}
+                        level = int(fields.get("level") or 4)
+                        mod = int(fields.get("level_mod") or 0)
+                        related["level"] = render_level(
+                            level, mod, card_id=card_id,
+                            scope="character", editing=True,
+                        )
 
 
 # --- Info Hook ---

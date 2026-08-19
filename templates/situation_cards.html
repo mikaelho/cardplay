@@ -8,7 +8,7 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="flex flex-wrap gap-3 mt-4" id="situation-card-levels" phx-hook="LevelAdjust">
+<div class="flex flex-wrap gap-3 mt-4" id="situation-card-levels">
     {% for card in situation_cards %}
     {% if situation_dice_assigned %}
         {% if is_keeper %}
@@ -45,13 +45,11 @@
                 <div class="flex flex-col items-center">
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1"
-                            data-card-id="{{card.id}}" data-baseline-delta="1"
-                            title="Shift up &mdash; right-click or hold to raise the baseline">&#9650;</button>
+                            title="Shift up temporarily">&#9650;</button>
                     <span class="text-lg my-0.5">{{card.level_html}}</span>
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1"
-                            data-card-id="{{card.id}}" data-baseline-delta="-1"
-                            title="Shift down &mdash; right-click or hold to lower the baseline">&#9660;</button>
+                            title="Shift down temporarily">&#9660;</button>
                 </div>
                 {% if card.bands %}
                 <div class="flex flex-col">
@@ -178,13 +176,11 @@
                 <div class="flex flex-col items-center">
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1"
-                            data-card-id="{{card.id}}" data-baseline-delta="1"
-                            title="Shift up &mdash; right-click or hold to raise the baseline">&#9650;</button>
+                            title="Shift up temporarily">&#9650;</button>
                     <span class="text-lg my-0.5">{{card.level_html}}</span>
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1"
-                            data-card-id="{{card.id}}" data-baseline-delta="-1"
-                            title="Shift down &mdash; right-click or hold to lower the baseline">&#9660;</button>
+                            title="Shift down temporarily">&#9660;</button>
                 </div>
                 {% endif %}
                 {% if card.bands %}
@@ -249,13 +245,11 @@
                 <div class="flex flex-col items-center">
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="1"
-                            data-card-id="{{card.id}}" data-baseline-delta="1"
-                            title="Shift up &mdash; right-click or hold to raise the baseline">&#9650;</button>
+                            title="Shift up temporarily">&#9650;</button>
                     <span class="text-2xl my-0.5">{{card.level_html}}</span>
                     <button class="btn btn-ghost btn-xs p-0 min-h-0 h-auto leading-none text-base-content/40 hover:text-base-content/70"
                             phx-click="adjust_situation_card_level" phx-value-card_id="{{card.id}}" phx-value-delta="-1"
-                            data-card-id="{{card.id}}" data-baseline-delta="-1"
-                            title="Shift down &mdash; right-click or hold to lower the baseline">&#9660;</button>
+                            title="Shift down temporarily">&#9660;</button>
                 </div>
                 {% else %}
                 <span class="text-2xl">{{card.level_html}}</span>

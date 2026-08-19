@@ -126,8 +126,8 @@
         .die-drag-ghost { opacity: 0.4; }
         /* Sortable's fallback drag is plain mouse events, so without this the
            press anchors a text selection that the drag then sweeps across the
-           cards. The long-press targets need it for the same reason. */
-        .die-drag, .die-slot, [data-baseline-delta] {
+           cards. */
+        .die-drag, .die-slot {
             user-select: none;
             -webkit-user-select: none;
             -webkit-touch-callout: none;

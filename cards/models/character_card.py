@@ -75,8 +75,11 @@ class CharacterCard(models.Model, AliveMixin):
             "bands": get_bands_for_level(current),
             "rating_html": render_rating(current),
             # Rendered rather than a bare number so the baseline shows through
-            # alive's generic inline level display.
-            "level": render_level(level, mod),
+            # alive's generic inline level display, and so clicking it opens
+            # the baseline editor. The edit state is stamped on afterwards, in
+            # a hook that can see the socket.
+            "level": render_level(level, mod, card_id=item_data["id"],
+                                  scope="character"),
         }
 
     @classmethod

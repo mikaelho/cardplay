@@ -60,25 +60,48 @@ DIE_CSS = Markup('''<style>
 </style>''')
 
 
-def render_level(level: int, level_mod: int = 0) -> Markup:
+def render_level(level: int, level_mod: int = 0, card_id: str = "",
+                 scope: str = "", editing: bool = False) -> Markup:
     """Render a card's rank: the current value, with the baseline beside it in
     small faint type whenever a temporary modifier is in play.
 
     The current value inherits the caller's font size so the same markup works
     at any scale; colour carries the direction of the shift.
+
+    Passing a card_id makes the number a toggle. Normally the card's up/down
+    arrows shift it temporarily; click the number and they move the baseline
+    instead until it is clicked again. Both numbers step together either way,
+    so there is no second set of controls to find.
     """
     from cards.models.card import effective_level
 
     level = level or 0
     level_mod = level_mod or 0
     current = effective_level(level, level_mod)
-    if not level_mod:
-        return Markup(f'<span class="font-bold leading-none">{current}</span>')
-    tone = "text-success" if level_mod > 0 else "text-error"
+
+    tone = ""
+    if level_mod:
+        tone = " text-success" if level_mod > 0 else " text-error"
+
+    attrs = ""
+    if card_id:
+        title = ("Moving the baseline \u2014 click to go back to shifting"
+                 if editing else f"Baseline {level} \u2014 click to change it")
+        ring = (" ring-2 ring-primary rounded px-1"
+                if editing else " hover:bg-base-300 rounded px-1")
+        attrs = (f' phx-click="start_baseline_edit" phx-value-card_id="{card_id}"'
+                 f' phx-value-scope="{scope}" title="{title}"'
+                 f' class="cursor-pointer{ring}"')
+
+    baseline = ""
+    if level_mod:
+        baseline = (
+            f'<span class="text-xs font-normal text-base-content/40 leading-none '
+            f'ml-0.5 align-top">{level}</span>'
+        )
     return Markup(
-        f'<span class="font-bold leading-none {tone}">{current}</span>'
-        f'<span class="text-xs font-normal text-base-content/40 leading-none '
-        f'ml-0.5 align-top" title="Baseline {level}">{level}</span>'
+        f'<span{attrs}><span class="font-bold leading-none{tone}">{current}</span>'
+        f'{baseline}</span>'
     )
 
 
