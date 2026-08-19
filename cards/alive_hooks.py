@@ -2232,8 +2232,15 @@ async def cardplay_event_handler(event, payload, socket):
                 sit = Situation.objects.get(pk=situation_id)
                 if not sit.dice or sit.dice_assigned:
                     return
+                idx = int(die_index)
+                if idx < 0 or idx >= len(sit.dice):
+                    return
                 assignments = sit.assignments or {}
-                assignments[str(card_id)] = int(die_index)
+                # A die sits on at most one card, so take it off whichever
+                # card is holding it (drag-and-drop can reassign directly).
+                for other_id in [k for k, v in assignments.items() if v == idx]:
+                    assignments.pop(other_id)
+                assignments[str(card_id)] = idx
                 sit.assignments = assignments
                 sit.save(update_fields=["assignments"])
 
