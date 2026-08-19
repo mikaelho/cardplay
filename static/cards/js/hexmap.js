@@ -14,6 +14,7 @@ window.Hooks.HexMap = {
         this._bindClick();
         this._bindKeydown();
         this._bindTimelineHover();
+        this._bindHighlightSignal();
     },
     updated() {
         this._bindClick();
@@ -26,6 +27,45 @@ window.Hooks.HexMap = {
         if (this._hoverCleanup) {
             this._hoverCleanup();
         }
+        if (this._signalTimer) {
+            clearTimeout(this._signalTimer);
+        }
+    },
+    _bindHighlightSignal() {
+        var hook = this;
+        // Server pushes 'hex_highlight' to every player when the keeper
+        // highlights a hex. Draw a transient pulsing signal on the map.
+        this.handleEvent('hex_highlight', function(payload) {
+            var svg = hook.el.querySelector('svg');
+            if (!svg || payload == null) return;
+            var cx = payload.cx, cy = payload.cy, r = payload.r;
+            if (cx == null || cy == null || r == null) return;
+
+            // Remove any previous signal still on the map
+            var prev = svg.querySelector('.hex-signal');
+            if (prev) prev.remove();
+            if (hook._signalTimer) clearTimeout(hook._signalTimer);
+
+            var SVGNS = 'http://www.w3.org/2000/svg';
+            var g = document.createElementNS(SVGNS, 'g');
+            g.setAttribute('class', 'hex-signal');
+            g.setAttribute('transform', 'translate(' + cx + ',' + cy + ')');
+            g.style.pointerEvents = 'none';
+            ['hex-signal-ring', 'hex-signal-ring hex-signal-ring-2'].forEach(function(cls) {
+                var c = document.createElementNS(SVGNS, 'circle');
+                c.setAttribute('cx', '0');
+                c.setAttribute('cy', '0');
+                c.setAttribute('r', String(r));
+                c.setAttribute('class', cls);
+                g.appendChild(c);
+            });
+            svg.appendChild(g);
+
+            hook._signalTimer = setTimeout(function() {
+                g.remove();
+                hook._signalTimer = null;
+            }, 3000);
+        });
     },
     _bindClick() {
         // Remove old listener if any

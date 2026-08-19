@@ -603,6 +603,12 @@ def render_hex_map(
         '  .hex-barrier { stroke: var(--color-primary); stroke-width: 3; stroke-linecap: round; }',
         '  @keyframes marker-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: 0.5; } }',
         '  .party-marker { animation: marker-pulse 2s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }',
+        '  @keyframes hex-signal-ping { 0% { transform: scale(0.2); opacity: 0.85; }'
+        ' 70% { opacity: 0; } 100% { transform: scale(2.4); opacity: 0; } }',
+        '  .hex-signal-ring { fill: none; stroke: var(--color-accent, var(--color-primary));'
+        ' stroke-width: 3; transform-origin: center; transform-box: fill-box;'
+        ' animation: hex-signal-ping 1.5s ease-out 2 forwards; }',
+        '  .hex-signal-ring-2 { animation-delay: 0.75s; }',
         '  .timeline-highlight { opacity: 0; pointer-events: none; }',
         '  .timeline-highlight.active { opacity: 1; }',
         '  .hex-move { cursor: pointer; }',

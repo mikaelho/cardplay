@@ -1,5 +1,6 @@
 """Cardplay-specific hooks for the Alive framework."""
 
+import json
 import random
 from asgiref.sync import sync_to_async
 from django.apps import apps
@@ -20,6 +21,20 @@ async def _broadcast(socket, model_class):
 async def _refresh(socket):
     """Trigger the framework's built-in view refresh."""
     await socket.liveview._refresh_view_async(socket)
+
+
+async def _push_client_event(socket, event_name, payload):
+    """Push a transient event to this socket's client.
+
+    Bypasses the render diff: the pub/sub (handle_info) path does not flush
+    socket.push_event's pending events, so we send the hook-event message
+    directly, mirroring the framework's own "diff" message shape.
+    """
+    msg = [None, None, socket.topic, "diff", {"e": [[event_name, payload]]}]
+    try:
+        await socket.websocket.send_text(json.dumps(msg))
+    except Exception:
+        pass
 
 
 # --- Data Loaders (moved from views.py private methods) ---
@@ -1383,6 +1398,30 @@ async def cardplay_event_handler(event, payload, socket):
         await _broadcast(socket, HexMap)
         return True
 
+    if event == "highlight_hex":
+        if not socket.context.is_keeper:
+            return True
+        target_key = socket.context.hex_action_hex or socket.context.hex_selected_hex
+        if not target_key:
+            return True
+        try:
+            col, row = map(int, target_key.split(","))
+        except (ValueError, AttributeError):
+            return True
+        from cards.ui import _hex_center
+        # Match render_hex_map defaults: hex_size=30, margin=hex_size*0.5
+        cx, cy = _hex_center(col, row, 30, 30 * 0.5)
+        signal = {"hex": target_key, "cx": round(cx, 1), "cy": round(cy, 1), "r": round(30 * 0.55, 1)}
+        # Broadcast to all map clients (including this keeper); each client's
+        # info hook turns it into a transient client-side pulse event.
+        store = get_store(HexMap)
+        await socket.broadcast(store.channel, {"action": "highlight_hex", "signal": signal})
+        # Close the action popup for the keeper.
+        socket.context.hex_action_hex = ""
+        socket.context.hex_action_is_adjacent = False
+        await load_map_data(socket)
+        return True
+
     if event == "close_hex_action":
         socket.context.hex_action_hex = ""
         socket.context.hex_action_is_adjacent = False
@@ -2519,6 +2558,14 @@ def _make_refresh_hook(conf_template):
 
 async def cardplay_info_hook(event, socket):
     """Handle Card channel events for hand footer updates."""
+    # Keeper hex highlight: deliver a transient pulse to every map client.
+    HexMap = apps.get_model('cards', 'HexMap')
+    if event.name == get_store(HexMap).channel:
+        data = event.payload
+        if data.get("action") == "highlight_hex" and data.get("signal"):
+            await _push_client_event(socket, "hex_highlight", data["signal"])
+            return
+
     if not socket.context.hand_is_player:
         return
     Card = apps.get_model('cards', 'Card')
