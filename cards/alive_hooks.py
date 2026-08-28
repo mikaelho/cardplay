@@ -3,6 +3,7 @@
 import json
 import random
 import threading
+from collections import defaultdict
 from asgiref.sync import sync_to_async
 from django.apps import apps
 from django.db import transaction
@@ -2560,6 +2561,348 @@ async def cardplay_event_handler(event, payload, socket):
             await socket.push_navigate("/alive/character/", {"detail": result_id})
         return True
 
+    # --- Timeline cards ---
+
+    if event in (
+        "timeline_add", "timeline_add_detail", "timeline_edit", "timeline_save",
+        "timeline_cancel_edit", "timeline_delete", "timeline_move", "timeline_place",
+        "timeline_insert", "timeline_remove_column", "timeline_insert_card",
+        "timeline_tint_toggle", "timeline_set_tint",
+    ):
+        TimelineCard = apps.get_model('cards', 'TimelineCard')
+        Timeline = apps.get_model('cards', 'Timeline')
+        game_id = socket.context.frame.get("game_id")
+        sid = socket.context.session_id
+        if not game_id:
+            return True
+
+        @sync_to_async(thread_sensitive=False)
+        def _timeline_pk():
+            tl, _ = Timeline.objects.get_or_create(game_id=game_id)
+            return tl.pk
+        timeline_pk = await _timeline_pk()
+
+        if event == "timeline_add":
+            want = payload.get("slot", "")
+            if isinstance(want, list):
+                want = want[0] if want else ""
+            try:
+                want = int(want)
+            except (TypeError, ValueError):
+                want = None
+
+            @sync_to_async(thread_sensitive=False)
+            def _add():
+                used = set(
+                    TimelineCard.objects.filter(timeline_id=timeline_pk, parent__isnull=True)
+                    .values_list("position", flat=True)
+                )
+                if want is not None and want >= 0 and want not in used:
+                    slot = want
+                else:
+                    slot = 0
+                    while slot in used:
+                        slot += 1
+                card = TimelineCard.objects.create(
+                    timeline_id=timeline_pk, parent=None, depth=0, position=slot, title="",
+                )
+                return card.pk
+
+            new_pk = await _add()
+            _timeline_begin_title_edit(socket, sid, new_pk)
+            await load_timeline_data(socket)
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_add_detail":
+            parent_id = payload.get("parent_id", "")
+            if isinstance(parent_id, list):
+                parent_id = parent_id[0] if parent_id else ""
+            if not parent_id:
+                return True
+
+            @sync_to_async(thread_sensitive=False)
+            def _add_detail():
+                try:
+                    parent = TimelineCard.objects.get(pk=parent_id, timeline_id=timeline_pk)
+                except TimelineCard.DoesNotExist:
+                    return None
+                if parent.depth >= 2:
+                    return None
+                last = (
+                    TimelineCard.objects.filter(parent_id=parent.pk)
+                    .order_by("-position").values_list("position", flat=True).first()
+                )
+                pos = 0 if last is None else last + 1
+                card = TimelineCard.objects.create(
+                    timeline_id=parent.timeline_id, parent=parent,
+                    depth=parent.depth + 1, position=pos, title="",
+                )
+                return card.pk
+
+            new_pk = await _add_detail()
+            _timeline_begin_title_edit(socket, sid, new_pk)
+            await load_timeline_data(socket)
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_edit":
+            # id may be a card pk or the sentinel "timeline" (the header).
+            card_id = payload.get("id", "")
+            field_name = payload.get("field", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if isinstance(field_name, list):
+                field_name = field_name[0] if field_name else ""
+            if field_name not in ("title", "notes") or not card_id:
+                return True
+            # Release any field this socket already held open.
+            if socket.context.timeline_editing_id and socket.context.timeline_editing_field:
+                release_lock(TIMELINE_LOCK_LABEL, socket.context.timeline_editing_id,
+                             socket.context.timeline_editing_field, sid)
+            if acquire_lock(TIMELINE_LOCK_LABEL, card_id, field_name, sid):
+                socket.context.timeline_editing_id = card_id
+                socket.context.timeline_editing_field = field_name
+            await load_timeline_data(socket)
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_save":
+            card_id = socket.context.timeline_editing_id
+            field_name = socket.context.timeline_editing_field
+            value = payload.get("value", "")
+            if isinstance(value, list):
+                value = value[0] if value else ""
+            if card_id and field_name in ("title", "notes"):
+                if get_lock_holder(TIMELINE_LOCK_LABEL, card_id, field_name) == sid:
+                    if field_name == "title":
+                        value = value.strip()[:200]
+
+                    @sync_to_async(thread_sensitive=False)
+                    def _save():
+                        if card_id == "timeline":
+                            Timeline.objects.filter(pk=timeline_pk).update(**{field_name: value})
+                        else:
+                            (TimelineCard.objects
+                             .filter(pk=card_id, timeline_id=timeline_pk)
+                             .update(**{field_name: value}))
+
+                    await _save()
+                release_lock(TIMELINE_LOCK_LABEL, card_id, field_name, sid)
+            socket.context.timeline_editing_id = ""
+            socket.context.timeline_editing_field = ""
+            await load_timeline_data(socket)
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_cancel_edit":
+            if socket.context.timeline_editing_id and socket.context.timeline_editing_field:
+                release_lock(TIMELINE_LOCK_LABEL, socket.context.timeline_editing_id,
+                             socket.context.timeline_editing_field, sid)
+            socket.context.timeline_editing_id = ""
+            socket.context.timeline_editing_field = ""
+            await load_timeline_data(socket)
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_delete":
+            card_id = payload.get("id", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if card_id:
+                @sync_to_async(thread_sensitive=False)
+                def _delete():
+                    TimelineCard.objects.filter(pk=card_id, timeline_id=timeline_pk).delete()
+
+                await _delete()
+                await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_move":
+            card_id = payload.get("id", "")
+            slot = payload.get("slot", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if isinstance(slot, list):
+                slot = slot[0] if slot else ""
+            try:
+                slot = int(slot)
+            except (TypeError, ValueError):
+                return True
+
+            @sync_to_async(thread_sensitive=False)
+            def _move():
+                try:
+                    card = TimelineCard.objects.get(pk=card_id, timeline_id=timeline_pk)
+                except TimelineCard.DoesNotExist:
+                    return
+                if card.depth != 0 or slot < 0:
+                    return
+                occupied = (
+                    TimelineCard.objects.filter(
+                        timeline_id=timeline_pk, parent__isnull=True, position=slot)
+                    .exclude(pk=card.pk).exists()
+                )
+                if occupied:
+                    return
+                card.position = slot
+                card.save(update_fields=["position"])
+
+            await _move()
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_place":
+            card_id = payload.get("id", "")
+            parent_id = payload.get("parent_id", "")
+            position = payload.get("position", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if isinstance(parent_id, list):
+                parent_id = parent_id[0] if parent_id else ""
+            if isinstance(position, list):
+                position = position[0] if position else ""
+            try:
+                position = int(position)
+            except (TypeError, ValueError):
+                position = 0
+
+            @sync_to_async(thread_sensitive=False)
+            def _place():
+                try:
+                    card = TimelineCard.objects.get(pk=card_id, timeline_id=timeline_pk)
+                    parent = TimelineCard.objects.get(pk=parent_id, timeline_id=timeline_pk)
+                except TimelineCard.DoesNotExist:
+                    return
+                # Groups keep levels aligned; refuse anything that would deepen
+                # the tree or cross timelines.
+                if parent.depth + 1 != card.depth or parent.pk == card.pk:
+                    return
+                siblings = list(
+                    TimelineCard.objects.filter(parent_id=parent.pk)
+                    .exclude(pk=card.pk).order_by("position", "pk")
+                )
+                idx = max(0, min(position, len(siblings)))
+                siblings.insert(idx, card)
+                card.parent = parent
+                for i, sib in enumerate(siblings):
+                    if sib.pk == card.pk:
+                        card.position = i
+                        card.save(update_fields=["parent", "position"])
+                    elif sib.position != i:
+                        sib.position = i
+                        sib.save(update_fields=["position"])
+
+            await _place()
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event in ("timeline_insert", "timeline_remove_column"):
+            at = payload.get("at", "")
+            if isinstance(at, list):
+                at = at[0] if at else ""
+            try:
+                at = int(at)
+            except (TypeError, ValueError):
+                return True
+            if at < 0:
+                return True
+            insert = event == "timeline_insert"
+
+            @sync_to_async(thread_sensitive=False)
+            def _shift():
+                tops = TimelineCard.objects.filter(timeline_id=timeline_pk, parent__isnull=True)
+                if insert:
+                    # Open a gap column at `at`: push everything at/after it right.
+                    for c in tops.filter(position__gte=at).order_by("-position"):
+                        c.position += 1
+                        c.save(update_fields=["position"])
+                else:
+                    # Close the empty column at `at` (only if truly empty): pull
+                    # everything after it left.
+                    if tops.filter(position=at).exists():
+                        return
+                    for c in tops.filter(position__gt=at).order_by("position"):
+                        c.position -= 1
+                        c.save(update_fields=["position"])
+
+            await _shift()
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_insert_card":
+            card_id = payload.get("id", "")
+            at = payload.get("at", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if isinstance(at, list):
+                at = at[0] if at else ""
+            try:
+                at = int(at)
+            except (TypeError, ValueError):
+                return True
+            if at < 0:
+                return True
+
+            @sync_to_async(thread_sensitive=False)
+            def _insert_card():
+                try:
+                    card = TimelineCard.objects.get(pk=card_id, timeline_id=timeline_pk)
+                except TimelineCard.DoesNotExist:
+                    return
+                if card.depth != 0:
+                    return
+                # Make room at `at` (shifting others, not the card itself), then
+                # drop the card in — its old column is left as a gap.
+                others = (TimelineCard.objects
+                          .filter(timeline_id=timeline_pk, parent__isnull=True, position__gte=at)
+                          .exclude(pk=card.pk).order_by("-position"))
+                for c in others:
+                    c.position += 1
+                    c.save(update_fields=["position"])
+                card.position = at
+                card.save(update_fields=["position"])
+
+            await _insert_card()
+            await _broadcast(socket, TimelineCard)
+            return True
+
+        if event == "timeline_tint_toggle":
+            card_id = payload.get("id", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            # Toggle this card's palette open/closed for this socket only.
+            socket.context.timeline_tint_open_id = (
+                "" if socket.context.timeline_tint_open_id == card_id else card_id
+            )
+            await load_timeline_data(socket)
+            return True
+
+        if event == "timeline_set_tint":
+            card_id = payload.get("id", "")
+            tint = payload.get("tint", "")
+            if isinstance(card_id, list):
+                card_id = card_id[0] if card_id else ""
+            if isinstance(tint, list):
+                tint = tint[0] if tint else ""
+            # Only accept known palette colours (or blank) — this value lands in
+            # an inline style attribute, so never trust it raw.
+            if tint not in TIMELINE_TINTS and tint != "":
+                return True
+            socket.context.timeline_tint_open_id = ""
+            if card_id:
+                @sync_to_async(thread_sensitive=False)
+                def _set_tint():
+                    TimelineCard.objects.filter(pk=card_id, timeline_id=timeline_pk).update(tint=tint)
+
+                await _set_tint()
+                await _broadcast(socket, TimelineCard)
+            else:
+                await load_timeline_data(socket)
+            return True
+
+        return True
+
     # --- Quick dice rolls (sidebar) ---
 
     if event == "quick_roll_d6":
@@ -2575,6 +2918,140 @@ async def cardplay_event_handler(event, payload, socket):
 
     # Not a cardplay event
     return False
+
+
+# --- Timeline Data Loader ---
+
+TIMELINE_LOCK_LABEL = "cards.timelinecard"
+
+# Curated tint palette, in light / mid / dark rows so cards can be classified
+# dark vs light. Kept server-side because the chosen value is written into an
+# inline style attribute — only these exact strings are accepted.
+TIMELINE_TINT_ROWS = [
+    ["#fecaca", "#fed7aa", "#fef08a", "#bbf7d0", "#bfdbfe", "#ddd6fe", "#fbcfe8", "#e5e7eb"],
+    ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6", "#8b5cf6", "#ec4899", "#6b7280"],
+    ["#7f1d1d", "#7c2d12", "#713f12", "#14532d", "#1e3a8a", "#4c1d95", "#831843", "#1f2937"],
+]
+TIMELINE_TINTS = [c for row in TIMELINE_TINT_ROWS for c in row]
+
+
+def _timeline_begin_title_edit(socket, sid, new_pk):
+    """Put a freshly created card straight into title-edit mode for this socket,
+    so the input renders focused (AutoFocus) and the user can just type."""
+    if not new_pk:
+        return
+    if socket.context.timeline_editing_id and socket.context.timeline_editing_field:
+        release_lock(TIMELINE_LOCK_LABEL, socket.context.timeline_editing_id,
+                     socket.context.timeline_editing_field, sid)
+    cid = str(new_pk)
+    if acquire_lock(TIMELINE_LOCK_LABEL, cid, "title", sid):
+        socket.context.timeline_editing_id = cid
+        socket.context.timeline_editing_field = "title"
+
+
+async def load_timeline_data(socket):
+    """Load the shared per-game timeline into context: the timeline's title and
+    notes header, plus a horizontal slot row of top-level cards, each carrying
+    its nested detail subtree."""
+    game_id = socket.context.frame.get("game_id")
+    sid = socket.context.session_id
+    editing_id = socket.context.timeline_editing_id
+    editing_field = socket.context.timeline_editing_field
+    tint_open_id = socket.context.timeline_tint_open_id
+
+    if not game_id:
+        socket.context.timeline_slots = []
+        socket.context.timeline_slot_count = 0
+        return
+
+    @sync_to_async(thread_sensitive=False)
+    def _fetch():
+        TimelineCard = apps.get_model('cards', 'TimelineCard')
+        Timeline = apps.get_model('cards', 'Timeline')
+        timeline, _ = Timeline.objects.get_or_create(game_id=game_id)
+        cards = list(
+            TimelineCard.objects.filter(timeline_id=timeline.pk)
+            .order_by("depth", "position", "pk")
+        )
+        # Which fields another client currently holds open, so we can show them
+        # as busy here (standard alive edit-locking). "timeline" is the header.
+        locks = {}
+        for key in [str(c.pk) for c in cards] + ["timeline"]:
+            for f in ("title", "notes"):
+                holder = get_lock_holder(TIMELINE_LOCK_LABEL, key, f)
+                if holder is not None:
+                    locks[(key, f)] = holder
+        return timeline, cards, locks
+
+    timeline, cards, locks = await _fetch()
+
+    by_parent = defaultdict(list)
+    for c in cards:
+        by_parent[c.parent_id].append(c)
+
+    def _field(cid, field):
+        holder = locks.get((cid, field))
+        return (
+            cid == editing_id and field == editing_field,       # editing here
+            holder is not None and holder != sid,               # locked elsewhere
+        )
+
+    CARD_CLASS = {0: "tl-card tl-top", 1: "tl-card tl-detail", 2: "tl-card tl-sub"}
+    GRIP_CLASS = {0: "tl-grip-top", 1: "tl-grip-detail", 2: "tl-grip-sub"}
+    ZONE_CLASS = {0: "detail-zone", 1: "subdetail-zone", 2: ""}
+
+    def node(c):
+        cid = str(c.pk)
+        title_editing, title_locked = _field(cid, "title")
+        notes_editing, notes_locked = _field(cid, "notes")
+        return {
+            "id": cid,
+            "depth": c.depth,
+            "position": c.position,
+            "title": c.title,
+            "notes": c.notes,
+            "notes_html": render_markdown_safe(c.notes) if c.notes.strip() else "",
+            "title_editing": title_editing,
+            "title_locked": title_locked,
+            "notes_editing": notes_editing,
+            "notes_locked": notes_locked,
+            "can_add_detail": c.depth < 2,
+            "tint": c.tint,
+            "tint_open": cid == tint_open_id,
+            "card_class": CARD_CLASS.get(c.depth, "tl-card"),
+            "grip_class": GRIP_CLASS.get(c.depth, "tl-grip-top"),
+            "zone_class": ZONE_CLASS.get(c.depth, ""),
+            "children": [node(ch) for ch in by_parent.get(c.pk, [])],
+        }
+
+    # Timeline header (title + notes), edited via the "timeline" sentinel id.
+    t_title_editing, t_title_locked = _field("timeline", "title")
+    t_notes_editing, t_notes_locked = _field("timeline", "notes")
+    socket.context.timeline_title = timeline.title
+    socket.context.timeline_notes = timeline.notes
+    socket.context.timeline_notes_html = (
+        render_markdown_safe(timeline.notes) if timeline.notes.strip() else ""
+    )
+    socket.context.timeline_title_editing = t_title_editing
+    socket.context.timeline_title_locked = t_title_locked
+    socket.context.timeline_notes_editing = t_notes_editing
+    socket.context.timeline_notes_locked = t_notes_locked
+    socket.context.timeline_tint_palette = TIMELINE_TINT_ROWS
+
+    tops = by_parent.get(None, [])
+    max_slot = max((c.position for c in tops), default=-1)
+    slot_count = max(max_slot + 2, 1)  # one trailing empty slot; at least one column
+    slots = [None] * slot_count
+    for c in tops:
+        if 0 <= c.position < slot_count and slots[c.position] is None:
+            slots[c.position] = node(c)
+    # An empty slot is "interior" when a card sits to its right, so its column
+    # can be removed to close a gap; trailing empties are just headroom.
+    socket.context.timeline_slots = [
+        {"index": i, "card": s, "interior_empty": s is None and i < max_slot}
+        for i, s in enumerate(slots)
+    ]
+    socket.context.timeline_slot_count = slot_count
 
 
 # --- Mount Hook ---
@@ -2618,6 +3095,8 @@ def _make_params_hook(conf_template):
             await load_situation_data(socket, is_situation, is_map)
         if is_map:
             await load_map_data(socket)
+        if conf_template == "timeline.html":
+            await load_timeline_data(socket)
         _stamp_inline_card_controls(socket)
     return cardplay_params_hook
 
@@ -2633,6 +3112,8 @@ def _make_refresh_hook(conf_template):
             await load_situation_data(socket, is_situation, is_map)
         if is_map:
             await load_map_data(socket)
+        if conf_template == "timeline.html":
+            await load_timeline_data(socket)
         if socket.context.hand_is_player:
             await load_hand_data(socket)
         _stamp_inline_card_controls(socket)

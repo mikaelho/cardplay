@@ -1,0 +1,166 @@
+{% include "frame_top.html" %}
+<style>
+    /* Timeline slot row */
+    .tl-row { display: flex; gap: 0.75rem; align-items: flex-start; padding-bottom: 1rem; }
+    .timeline-slot {
+        width: 15rem;
+        flex: 0 0 15rem;
+        min-height: 6rem;
+        border-radius: 0.75rem;
+    }
+    .timeline-slot.tl-empty {
+        border: 2px dashed var(--color-base-300);
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        gap: 0.5rem;
+        color: var(--color-base-content);
+        min-height: 8rem;
+    }
+    .timeline-slot.tl-empty:hover { border-color: var(--color-primary); }
+    .tl-empty-add { font-size: 0.875rem; opacity: 0.5; }
+    .tl-empty-add:hover { opacity: 1; color: var(--color-primary); }
+    .tl-empty-remove { font-size: 0.7rem; opacity: 0; color: var(--color-base-content); }
+    .timeline-slot.tl-empty:hover .tl-empty-remove { opacity: 0.4; }
+    .tl-empty-remove:hover { opacity: 1 !important; color: var(--color-error); }
+
+    /* Insert-a-column bars between and around columns */
+    .tl-insert {
+        align-self: stretch;
+        width: 1.1rem; flex: 0 0 1.1rem;
+        display: flex; align-items: flex-start; justify-content: center;
+        padding-top: 0.5rem;
+    }
+    .tl-insert-btn {
+        opacity: 0; font-size: 1rem; line-height: 1;
+        width: 1.1rem; height: 1.6rem; border-radius: 0.375rem;
+        color: var(--color-base-content);
+    }
+    .tl-row:hover .tl-insert-btn { opacity: 0.35; }
+    .tl-insert-btn:hover { opacity: 1 !important; background: var(--color-primary); color: var(--color-primary-content); }
+    .dragging-tl .tl-insert { outline: 2px dashed var(--color-primary); outline-offset: 1px; border-radius: 0.375rem; }
+
+    /* Cards */
+    .tl-card { background: var(--color-base-100); border: 1px solid var(--color-base-300);
+               border-radius: 0.75rem; box-shadow: 0 1px 2px rgb(0 0 0 / 0.06); }
+    .tl-top { border-top: 3px solid var(--color-primary); }
+    .tl-detail { border-left: 3px solid var(--color-secondary); }
+    .tl-sub { border-left: 3px solid var(--color-accent); }
+    .tl-card + .tl-card { margin-top: 0.5rem; }
+
+    .detail-zone, .subdetail-zone { margin-top: 0.5rem; min-height: 0.5rem; }
+    .subdetail-zone { margin-left: 0.75rem; }
+
+    .tl-grip-top, .tl-grip-detail, .tl-grip-sub {
+        cursor: grab; user-select: none; -webkit-user-select: none;
+        color: var(--color-base-content); opacity: 0.35; line-height: 1;
+    }
+    .tl-grip-top:hover, .tl-grip-detail:hover, .tl-grip-sub:hover { opacity: 0.8; }
+
+    /* Drag feedback */
+    .tl-ghost { opacity: 0.35; }
+    .dragging-tl .timeline-slot.tl-empty,
+    .drop-armed { outline: 2px dashed var(--color-primary); outline-offset: 2px; }
+    .tl-title-text:hover, .tl-notes-text:hover { background: var(--color-base-200); border-radius: 0.25rem; }
+    .tl-locked { opacity: 0.6; cursor: not-allowed; }
+
+    /* Tint control */
+    .tl-tint-swatch {
+        width: 0.95rem; height: 0.95rem; border-radius: 9999px;
+        border: 1px solid var(--color-base-300); flex: 0 0 auto;
+    }
+    .tl-tint-swatch.tl-tint-none {
+        background:
+            linear-gradient(135deg, transparent 45%, var(--color-base-content) 45%, var(--color-base-content) 55%, transparent 55%);
+        opacity: 0.4;
+    }
+    .tl-tint-swatch.tl-tint-none:hover { opacity: 0.8; }
+    .tl-tint-palette {
+        display: flex; flex-direction: column; gap: 0.3rem; align-items: flex-start;
+        margin-top: 0.4rem; padding: 0.4rem;
+        background: var(--color-base-200); border-radius: 0.5rem;
+    }
+    .tl-tint-row { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .tl-tint-dot {
+        width: 1.05rem; height: 1.05rem; border-radius: 9999px;
+        border: 1px solid rgb(0 0 0 / 0.2);
+    }
+    .tl-tint-dot:hover { outline: 2px solid var(--color-base-content); outline-offset: 1px; }
+    .tl-tint-clear {
+        margin-top: 0.15rem; padding: 0 0.4rem; height: 1.2rem;
+        font-size: 0.7rem; line-height: 1; color: var(--color-base-content);
+        border: 1px dashed var(--color-base-content); border-radius: 0.35rem;
+    }
+    .tl-tint-clear:hover { background: var(--color-base-300); }
+</style>
+
+<div class="container mx-auto p-4">
+    {% if breadcrumbs %}
+    <div class="text-sm breadcrumbs mb-4">
+        <ul>
+            {% for crumb in breadcrumbs %}
+            <li>{% if crumb.url %}<a href="{{crumb.url}}" class="link">{{crumb.label}}</a>{% else %}<span>{{crumb.label}}</span>{% endif %}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="flex justify-between items-start gap-4 mb-2">
+        <div class="flex-1 min-w-0">
+            {% if timeline_title_editing %}
+            <div phx-hook="AutoFocus" id="tl-header-title">
+                <input type="text" name="value" value="{{timeline_title}}" autocomplete="off"
+                       class="input input-lg w-full text-3xl font-bold" phx-blur="timeline_save" />
+            </div>
+            {% elif timeline_title_locked %}
+            <h1 class="text-3xl font-bold tl-locked" title="Someone is editing this">{{timeline_title}}</h1>
+            {% else %}
+            <h1 class="text-3xl font-bold cursor-text tl-title-text"
+                phx-click="timeline_edit" phx-value-id="timeline" phx-value-field="title">
+                {% if timeline_title %}{{timeline_title}}{% else %}Timeline{% endif %}
+            </h1>
+            {% endif %}
+        </div>
+        <button class="btn btn-primary shrink-0" phx-click="timeline_add">+ Add card</button>
+    </div>
+
+    <div class="mb-6 max-w-3xl">
+        {% if timeline_notes_editing %}
+        <div phx-hook="AutoFocus" id="tl-header-notes">
+            <textarea name="value" rows="3" autocomplete="off"
+                      class="textarea w-full" phx-blur="timeline_save">{{timeline_notes}}</textarea>
+        </div>
+        {% elif timeline_notes_locked %}
+        <div class="prose max-w-none tl-locked">{{timeline_notes_html}}</div>
+        {% else %}
+        <div class="cursor-text tl-notes-text"
+             phx-click="timeline_edit" phx-value-id="timeline" phx-value-field="notes">
+            {% if timeline_notes %}<div class="prose max-w-none">{{timeline_notes_html}}</div>{% else %}<span class="opacity-40 italic">Add a description for this timeline…</span>{% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="overflow-x-auto">
+        <div class="tl-row" id="timeline-dnd" phx-hook="TimelineDnd">
+            {% for slot in timeline_slots %}
+            <div class="tl-insert" data-insert="{{slot.index}}">
+                <button class="tl-insert-btn" phx-click="timeline_insert" phx-value-at="{{slot.index}}" title="Insert a column here">+</button>
+            </div>
+            {% if slot.card %}
+            <div class="timeline-slot" data-slot="{{slot.index}}">
+                {% include "timeline_card.html" with card=slot.card %}
+            </div>
+            {% else %}
+            <div class="timeline-slot tl-empty" data-slot="{{slot.index}}">
+                <button class="tl-empty-add" phx-click="timeline_add" phx-value-slot="{{slot.index}}">+ card</button>
+                {% if slot.interior_empty %}
+                <button class="tl-empty-remove" phx-click="timeline_remove_column" phx-value-at="{{slot.index}}" title="Remove this empty column">✕ gap</button>
+                {% endif %}
+            </div>
+            {% endif %}
+            {% endfor %}
+            <div class="tl-insert" data-insert="{{timeline_slot_count}}">
+                <button class="tl-insert-btn" phx-click="timeline_insert" phx-value-at="{{timeline_slot_count}}" title="Insert a column here">+</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "frame_bottom.html" %}

@@ -64,6 +64,22 @@ class CardplayContext(ModelContext):
     # Timeline / party location
     timeline_entries: list[dict] = field(default_factory=list)
     party_location: str = ""
+    # Timeline cards (shared per-game note-card timeline)
+    timeline_slots: list[dict] = field(default_factory=list)
+    timeline_slot_count: int = 0
+    timeline_editing_id: str = ""
+    timeline_editing_field: str = ""
+    # Timeline header (title + notes on the Timeline object)
+    timeline_title: str = ""
+    timeline_notes: str = ""
+    timeline_notes_html: str = ""
+    timeline_title_editing: bool = False
+    timeline_title_locked: bool = False
+    timeline_notes_editing: bool = False
+    timeline_notes_locked: bool = False
+    # Card tint control
+    timeline_tint_open_id: str = ""
+    timeline_tint_palette: list = field(default_factory=list)
     # Map create dialog
     map_create_open: bool = False
     map_create_type: str = ""

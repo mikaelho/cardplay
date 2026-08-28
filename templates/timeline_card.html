@@ -1,0 +1,72 @@
+<div class="{{card.card_class}}" data-id="{{card.id}}"{% if card.tint %} style="border-color:{{card.tint}}"{% endif %}>
+    <div class="p-2">
+        <div class="flex items-center gap-1">
+            <span class="{{card.grip_class}}" title="Drag to move">⠿</span>
+            <div class="flex-1 min-w-0">
+                {% if card.title_editing %}
+                <div phx-hook="AutoFocus" id="tl-title-{{card.id}}">
+                    <input type="text" name="value" value="{{card.title}}" autocomplete="off"
+                           class="input input-sm w-full font-semibold"
+                           phx-blur="timeline_save" />
+                </div>
+                {% elif card.title_locked %}
+                <span class="font-semibold block truncate tl-locked" title="Someone is editing this">{{card.title}}</span>
+                {% else %}
+                <span class="font-semibold block truncate cursor-text tl-title-text"
+                      phx-click="timeline_edit" phx-value-id="{{card.id}}" phx-value-field="title">
+                    {% if card.title %}{{card.title}}{% else %}<span class="opacity-40 italic font-normal">Untitled</span>{% endif %}
+                </span>
+                {% endif %}
+            </div>
+            <button class="tl-tint-swatch{% if not card.tint %} tl-tint-none{% endif %}"
+                    phx-click="timeline_tint_toggle" phx-value-id="{{card.id}}" title="Set tint colour"
+                    {% if card.tint %}style="background:{{card.tint}};border-color:{{card.tint}}"{% endif %}></button>
+            <button class="btn btn-ghost btn-xs btn-circle text-base-content/40 hover:text-error"
+                    id="tl-del-{{card.id}}" phx-hook="ConfirmClick" data-confirm="Delete this card and its details?"
+                    phx-click="timeline_delete" phx-value-id="{{card.id}}" title="Delete">✕</button>
+        </div>
+
+        {% if card.tint_open %}
+        <div class="tl-tint-palette">
+            {% for row in timeline_tint_palette %}
+            <div class="tl-tint-row">
+                {% for c in row %}
+                <button class="tl-tint-dot" style="background:{{c}}" title="{{c}}"
+                        phx-click="timeline_set_tint" phx-value-id="{{card.id}}" phx-value-tint="{{c}}"></button>
+                {% endfor %}
+            </div>
+            {% endfor %}
+            <button class="tl-tint-clear" title="Clear tint"
+                    phx-click="timeline_set_tint" phx-value-id="{{card.id}}" phx-value-tint="">✕ none</button>
+        </div>
+        {% endif %}
+
+        {% if card.notes_editing %}
+        <div phx-hook="AutoFocus" id="tl-notes-{{card.id}}" class="mt-1">
+            <textarea name="value" rows="3" autocomplete="off"
+                      class="textarea textarea-sm w-full leading-snug"
+                      phx-blur="timeline_save">{{card.notes}}</textarea>
+        </div>
+        {% elif card.notes_locked %}
+        <div class="text-sm mt-1 tl-locked prose prose-sm max-w-none">{{card.notes_html}}</div>
+        {% else %}
+        <div class="text-sm mt-1 cursor-text tl-notes-text px-1"
+             phx-click="timeline_edit" phx-value-id="{{card.id}}" phx-value-field="notes">
+            {% if card.notes %}<div class="prose prose-sm max-w-none">{{card.notes_html}}</div>{% else %}<span class="opacity-40 italic">Add notes…</span>{% endif %}
+        </div>
+        {% endif %}
+
+        {% if card.can_add_detail %}
+        <button class="btn btn-ghost btn-xs mt-1 text-base-content/50 hover:text-primary"
+                phx-click="timeline_add_detail" phx-value-parent_id="{{card.id}}">+ detail</button>
+        {% endif %}
+    </div>
+
+    {% if card.zone_class %}
+    <div class="{{card.zone_class}} px-2 pb-2" data-parent="{{card.id}}">
+        {% for child in card.children %}
+        {% include "timeline_card.html" with card=child %}
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
